@@ -1,0 +1,294 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+
+
+@theme {
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+
+
+:root {
+       --bg-color: #161616;
+       --text-white: #FFFFFF;
+       --btn-color: #333333;
+       --primary-color: #FFD900;
+       --btn-hover-color: #FFFFFF;
+}
+/* h2{
+    font-family: 'Barlow Condensed', sans-serif;
+} */
+    body {
+        background-color: var(--bg-color);
+        overflow-x: hidden;
+        
+        
+    }
+
+    .btn {
+        @apply  px-[20px] py-[10px] font-semibold text-[18px] tracking-wider transition-all duration-300 md:px-[28px] md:py-[10px];
+        &:hover {
+            @apply bg-[var(--btn-hover-color)];
+        }   
+
+    }
+
+    .primary-button {
+        @apply bg-[var(--primary-color)] text-[var(--btn-color)] ;
+        &:hover {
+            @apply bg-[var(--btn-hover-color)];
+        }
+    }   
+
+    .secondary-button {
+        @apply bg-[#282828] text-[var(--text-white)] ;
+        &:hover {
+            @apply bg-[#FFD900];
+        }
+    } 
+
+
+    .header-desktop-nav {
+        @apply text-[18px] font-normal transition-colors duration-300;
+        &:hover {
+            @apply text-[#FFD900];
+        }
+    }
+
+    .mobile-menu-nav {
+        @apply text-[16px] font-normal transition-colors duration-300;
+        &:hover {
+            @apply text-[#FFD900];
+        }
+    }
+
+    @media (min-width: 1020px) and (max-width: 1150px) {
+        .mobile-menu-nav, .header-desktop-nav {
+            @apply text-[14px]!;
+        }
+        .header-logo {
+            @apply h-8!;
+        }
+    }
+
+    .footer-h4 {
+        @apply text-[28px] font-bold;
+    }
+
+   .hero-dropdown {
+    @apply w-full bg-[#353535] text-[var(--text-white)] p-5 appearance-none cursor-pointer transition-all
+           focus:outline-none focus:border-[#FFD900]
+           hover:border-[#FFD900];
+}
+ 
+.book-professional {
+    @apply text-[18px] md:text-[24px] font-medium text-[var(--text-white)] mb-4 block tracking-[0.2em] uppercase;
+}   
+
+.djs-mcs {
+    @apply text-[40px] md:text-[60px]  font-extrabold text-[var(--primary-color)] leading-[0.9] mb-4;
+}
+
+.right-card {
+    @apply bg-[#1C1C1C] backdrop-blur-2xl border border-white/10 p-8 md:p-12 rounded-none shadow-2xl md:rounded-[20px];
+}   
+
+.hero-dropdown-icon {
+    @apply absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/50 group-hover:text-[#FFD900] transition-colors;
+}
+
+.talent-label {
+    @apply text-white font-normal text-[20px] md:text-[24px] tracking-[0.2em] uppercase mb-2 block;
+}
+
+.talent-title {
+    @apply text-[20px] md:text-[40px] font-extrabold text-[var(--text-white)] mb-8;
+}
+
+.talent-card {
+    @apply bg-transparent overflow-hidden ;
+}
+
+.talent-card-img-wrapper {
+    @apply relative aspect-[4/3] mb-6 overflow-hidden ;
+}
+
+.talent-card-img {
+    @apply w-full h-full object-cover transition-transform duration-500 group-hover:scale-110;
+}
+
+.specialty-badge {
+    @apply bg-[#282828] text-(--text-white) px-4 py-2 text-[12px] font-normal rounded-none inline-block mb-2 mr-2;
+}
+
+.talent-meta-label {
+    @apply text-[var(--text-white)] text-[14px]  tracking-wider mb-1;
+}
+
+.talent-meta-value {
+    @apply text-[#777777] text-[12px];
+}
+
+.talent-title-h3 {
+    @apply text-[20px] md:text-[28px] font-bold text-[var(--text-white)] uppercase;
+}
+.location-text {
+    @apply flex items-center text-[var(--text-white)] text-[14px];
+}
+
+.professional {
+    @apply text-[var(--primary-color)] font-normal mb-4 text-[18px];
+}
+
+.specialty-label {
+    @apply text-[#777777] text-[18px]  tracking-widest mb-2;
+}
+
+.experience-label {
+    @apply text-(--primary-color) text-[16px] font-normal mb-4;
+}
+
+
+@media (max-width: 1440px) {
+    .btn {
+        @apply text-[14px];
+    }
+}
+/* how it work */
+.work-label {
+    @apply text-[var(--text-white)] font-normal text-[20px] md:text-[24px] tracking-[0.2em]  mb-2 block text-center;
+}
+
+.work-title {
+    @apply text-[24px] md:text-[45px] font-extralight text-[var(--text-white)] mb-12 text-center;
+}
+
+.step-badge {
+    @apply bg-[var(--primary-color)] text-[var(--btn-color)] text-[10px] font-bold px-[15px] py-[4px] inline-block mb-3;
+}
+
+.step-badge-gray {
+    @apply bg-[#434343] text-[var(--text-white)] text-[10px] font-bold px-[15px] py-[4px] inline-block mb-3;
+}
+
+.step-text {
+    @apply text-[18px] md:text-[22px] font-bold text-[var(--text-white)] leading-tight;
+}
+
+.work-img-wrapper {
+    @apply relative aspect-square mb-6 overflow-hidden;
+}
+
+.work-img {
+    @apply w-full h-full object-cover transition-transform duration-500 hover:scale-105;
+}
+
+/* Gallery Section */
+.gallery-label {
+    @apply text-(--text-white) font-normal text-[20px] md:text-[24px] tracking-[0.2em] mb-2 block text-center;
+}
+
+.gallery-title {
+    @apply text-[30px] md:text-[50px] font-normal text-(--text-white)  text-center leading-tight;
+}
+
+.gallery-grid {
+    @apply flex flex-wrap justify-center gap-4 md:gap-5 xl:gap-8 mb-16 px-4 overflow-hidden;
+}
+
+.gallery-item {
+    @apply relative w-[280px] md:w-[220px] lg:w-[240px] xl:w-[260px] aspect-[4/5] overflow-hidden transition-all duration-500 hover:scale-110 hover:z-10 hover:rotate-0!;
+}
+
+@media (min-width: 1300px) {
+    .gallery-grid {
+        @apply flex-nowrap gap-4 xl:gap-6;
+    }
+    .gallery-item {
+        @apply w-[19%] min-w-[220px] max-w-[260px];
+    }
+}
+
+
+.gallery-img {
+    @apply w-full h-full object-cover;
+}
+
+.tilt-left-1 { @apply -rotate-6; }
+.tilt-right-1 { @apply rotate-3; }
+.tilt-left-2 { @apply -rotate-3; }
+.tilt-right-2 { @apply rotate-6; }
+.tilt-left-3 { @apply -rotate-2; }
+
+/* Merch Section */
+.merch-label {
+    @apply text-[var(--text-white)] font-normal text-[20px] md:text-[24px] tracking-[0.2em] mb-2 block text-center;
+}
+
+.merch-title {
+    @apply text-[30px] md:text-[48px] font-bold text-[var(--text-white)] mb-6 text-center leading-tight;
+}
+
+.merch-desc {
+    @apply text-[var(--text-white)] font-normal text-center text-[18px] mb-16  max-w-2xl mx-auto;
+}
+
+.product-card {
+    @apply bg-transparent transition-all duration-300;
+}
+
+.product-img-wrapper {
+    @apply relative aspect-square mb-6 overflow-hidden;
+}
+
+.product-img {
+    @apply w-full h-full object-contain transition-transform duration-500 group-hover:scale-110;
+}
+
+.product-category {
+    @apply text-[#777777] font-normal text-xs opacity-50 mb-1 block;
+}
+
+.product-name {
+    @apply text-[var(--text-white)] font-bold text-[20px] md:text-[22px] mb-1;
+}
+
+.product-price {
+    @apply text-[var(--primary-color)] font-bold text-[20px] md:text-[22px];
+}
+
+/* Disk Jockey Section */
+.dj-section {
+    @apply relative w-full bg-cover bg-center bg-no-repeat overflow-hidden flex items-center mt-20;
+    background-image: url('../../../public/images/dj-jockey-bg-image.png');
+}
+
+.dj-label {
+    @apply text-(--text-white) font-normal text-[20px] md:text-[28px] tracking-[0.2em] mb-4 block;
+}
+
+.dj-title {
+    @apply text-[30px] md:text-[48px] font-bold text-(--text-white) mb-6 leading-tight;
+}
+
+.dj-desc {
+    @apply text-[var(--text-white)] font-normal text-[18px] mb-10 max-w-xl;
+}
+
+.dj-img-container {
+    @apply relative flex justify-center lg:justify-start items-end h-full w-full;
+}
+
+.dj-gif-overlay {
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[700px] aspect-square object-contain opacity-40 z-0;
+}
+
+.dj-main-img {
+    @apply relative z-10 w-full max-w-[500px] md:max-w-none block object-contain;
+}

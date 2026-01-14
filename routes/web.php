@@ -1,0 +1,116 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\DJController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\DJManagementController;
+use App\Http\Controllers\Admin\BookingManagementController;
+use App\Http\Controllers\Admin\EventManagementController;
+
+// Public Routes
+Route::get('/', function () {
+    $djs = \App\Models\DJ::with('user')
+        ->available()
+        ->verified()
+        ->orderBy('rating', 'desc')
+        ->limit(3)
+        ->get();
+    return view('home', compact('djs'));
+})->name('home');
+Route::get('/about-us', function () {
+    return view('about-us');
+})->name('about-us');
+Route::get('/browse', [DJController::class, 'index'])->name('browse');
+Route::get('/how-it-works', function () {
+    return view('how-it-works');
+})->name('how-it-works');
+Route::get('/gallery', function () {
+    return view('gallery');
+})->name('gallery');
+Route::get('/merch', function () {
+    return view('merch');
+})->name('merch');
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
+
+// Search Routes
+Route::post('/search', [SearchController::class, 'search'])->name('search');
+Route::post('/home-search', [SearchController::class, 'homeSearch'])->name('home.search');
+
+// DJ Routes
+Route::get('/dj/{id}', [DJController::class, 'show'])->name('dj.show');
+Route::get('/dj/{id}/book', [BookingController::class, 'create'])->name('bookings.create');
+
+// Authentication Routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/signup', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/signup', [RegisterController::class, 'register']);
+Route::get('/forgot-password', function () {
+    return view('forgot-password');
+})->name('password.request');
+
+// Authenticated Routes
+Route::middleware('auth')->group(function () {
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // DJ Profile Management
+    Route::get('/dj/create', [DJController::class, 'create'])->name('dj.create');
+    Route::post('/dj', [DJController::class, 'store'])->name('dj.store');
+    Route::get('/dj/{id}/edit', [DJController::class, 'edit'])->name('dj.edit');
+    Route::put('/dj/{id}', [DJController::class, 'update'])->name('dj.update');
+    Route::delete('/dj/{id}', [DJController::class, 'destroy'])->name('dj.destroy');
+
+    // Booking Routes
+    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{id}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::put('/bookings/{id}', [BookingController::class, 'update'])->name('bookings.update');
+    Route::post('/bookings/{id}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+    Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/bookings/{id}/complete', [BookingController::class, 'complete'])->name('bookings.complete');
+
+    // Payment Routes
+    Route::post('/bookings/{id}/payment-intent', [PaymentController::class, 'createPaymentIntent'])->name('payment.intent');
+    Route::post('/bookings/{id}/confirm-payment', [PaymentController::class, 'confirmPayment'])->name('payment.confirm');
+});
+
+// Admin Routes
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // DJ Management
+    Route::get('/djs', [DJManagementController::class, 'index'])->name('djs.index');
+    Route::get('/djs/{id}', [DJManagementController::class, 'show'])->name('djs.show');
+    Route::get('/djs/{id}/edit', [DJManagementController::class, 'edit'])->name('djs.edit');
+    Route::put('/djs/{id}', [DJManagementController::class, 'update'])->name('djs.update');
+    Route::post('/djs/{id}/verify', [DJManagementController::class, 'verify'])->name('djs.verify');
+    Route::post('/djs/{id}/unverify', [DJManagementController::class, 'unverify'])->name('djs.unverify');
+    Route::delete('/djs/{id}', [DJManagementController::class, 'destroy'])->name('djs.destroy');
+    
+    // Booking Management
+    Route::get('/bookings', [BookingManagementController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/{id}', [BookingManagementController::class, 'show'])->name('bookings.show');
+    Route::put('/bookings/{id}', [BookingManagementController::class, 'update'])->name('bookings.update');
+    Route::delete('/bookings/{id}', [BookingManagementController::class, 'destroy'])->name('bookings.destroy');
+    
+    // Event Management
+    Route::get('/events', [EventManagementController::class, 'index'])->name('events.index');
+    Route::get('/events/{id}', [EventManagementController::class, 'show'])->name('events.show');
+    Route::put('/events/{id}', [EventManagementController::class, 'update'])->name('events.update');
+    Route::delete('/events/{id}', [EventManagementController::class, 'destroy'])->name('events.destroy');
+});
+
+// Stripe Webhook
+Route::post('/webhook/stripe', [PaymentController::class, 'webhook'])->name('webhook.stripe');
