@@ -357,52 +357,51 @@
         <p class="merch-desc" data-aos="fade-up" data-aos-delay="200">Our most-loved designs that believers can't stop wearing.</p>
 
         <!-- Products Grid -->
+        @php
+            $featuredProducts = \App\Models\Product::active()->featured()->inStock()->orderBy('sort_order')->limit(4)->get();
+            if($featuredProducts->count() == 0) {
+                $featuredProducts = \App\Models\Product::active()->inStock()->orderBy('sort_order')->limit(4)->get();
+            }
+        @endphp
+        
+        @if($featuredProducts->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            
-            <!-- Product 1 -->
-            <div class="product-card group" data-aos="fade-right" data-aos-delay="300">
-                <div class="product-img-wrapper">
-                    <img src="{{ asset('images/shop-img-001.png') }}" alt="DJ Nova T-Shirt" class="product-img">
-                </div>
-                <span class="product-category">Sweatshirts</span>
-                <h3 class="product-name">DJ Nova T-Shirt</h3>
-                <p class="product-price">$29.99</p>
+            @foreach($featuredProducts as $index => $product)
+            <div class="product-card group" data-aos="fade-up" data-aos-delay="{{ 300 + ($index * 100) }}">
+                <a href="{{ route('products.show', $product->id) }}">
+                    <div class="product-img-wrapper relative">
+                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-img">
+                        @if($product->sale_price)
+                            <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">Sale</span>
+                        @endif
+                    </div>
+                    <span class="product-category">{{ $product->category ?? 'General' }}</span>
+                    <h3 class="product-name">{{ $product->name }}</h3>
+                    <div class="flex items-center gap-2">
+                        @if($product->sale_price)
+                            <p class="product-price text-[#FFD900]">${{ number_format($product->sale_price, 2) }}</p>
+                            <p class="text-gray-500 line-through text-sm">${{ number_format($product->price, 2) }}</p>
+                        @else
+                            <p class="product-price">${{ number_format($product->price, 2) }}</p>
+                        @endif
+                    </div>
+                    @if($product->stock <= 5 && $product->stock > 0)
+                        <p class="text-yellow-400 text-xs mt-1">Only {{ $product->stock }} left!</p>
+                    @elseif($product->stock == 0)
+                        <p class="text-red-400 text-xs mt-1">Out of Stock</p>
+                    @endif
+                </a>
             </div>
-
-            <!-- Product 2 -->
-            <div class="product-card group" data-aos="fade-down" data-aos-delay="400">
-                <div class="product-img-wrapper">
-                    <img src="{{ asset('images/shop-img-002.png') }}" alt="DJ Blocknote Hat" class="product-img">
-                </div>
-                <span class="product-category">Sweatshirts</span>
-                <h3 class="product-name">DJ Blocknote Hat</h3>
-                <p class="product-price">$19.99</p>
-            </div>
-
-            <!-- Product 3 -->
-            <div class="product-card group" data-aos="fade-up" data-aos-delay="500">
-                <div class="product-img-wrapper">
-                    <img src="{{ asset('images/shop-img-003.png') }}" alt="Event Essentials Tote Bag" class="product-img">
-                </div>
-                <span class="product-category">Sweatshirts</span>
-                <h3 class="product-name">Event Essentials Tote Bag</h3>
-                <p class="product-price">$15.99</p>
-            </div>
-
-            <!-- Product 4 -->
-            <div class="product-card group" data-aos="fade-left" data-aos-delay="600">
-                <div class="product-img-wrapper">
-                    <img src="{{ asset('images/shop-img-004.png') }}" alt="Soundwave Hoodie" class="product-img">
-                </div>
-                <span class="product-category">T-shirts</span>
-                <h3 class="product-name">Soundwave Hoodie</h3>
-                <p class="product-price">$39.99</p>
-            </div>
-
+            @endforeach
         </div>
+        @else
+        <div class="text-center py-12">
+            <p class="text-gray-400">No products available yet. Check back soon!</p>
+        </div>
+        @endif
 
         <div class="flex justify-center" data-aos="zoom-in" data-aos-delay="700">
-            <a href="#" class="btn primary-button">View Full Collection</a>
+            <a href="{{ route('merch') }}" class="btn primary-button">View Full Collection</a>
         </div>
 
     </div>

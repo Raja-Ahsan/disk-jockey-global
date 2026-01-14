@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\DJ;
 use App\Models\Category;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -86,13 +87,21 @@ class DJDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Recent orders (for products DJ purchased)
+        $recentOrders = Order::with('items.product')
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('dj.dashboard', compact(
             'dj',
             'stats',
             'monthlyEarnings',
             'bookingStatusData',
             'recentBookings',
-            'upcomingBookings'
+            'upcomingBookings',
+            'recentOrders'
         ));
     }
 

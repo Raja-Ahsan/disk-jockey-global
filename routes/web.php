@@ -33,12 +33,11 @@ Route::get('/how-it-works', function () {
 Route::get('/gallery', function () {
     return view('gallery');
 })->name('gallery');
-Route::get('/merch', function () {
-    return view('merch');
-})->name('merch');
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
+Route::get('/merch', [\App\Http\Controllers\ProductController::class, 'index'])->name('merch');
+Route::get('/products/{id}', [\App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
 
 // Search Routes
 Route::post('/search', [SearchController::class, 'search'])->name('search');
@@ -84,6 +83,27 @@ Route::middleware('auth')->group(function () {
     Route::put('/dj/{id}', [DJController::class, 'update'])->name('dj.update');
     Route::delete('/dj/{id}', [DJController::class, 'destroy'])->name('dj.destroy');
 
+    // Cart Routes
+    Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{id}', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+    Route::put('/cart/update/{id}', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{id}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
+
+    // Checkout Routes
+    Route::get('/checkout', [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout/confirm/{orderId}', [\App\Http\Controllers\CheckoutController::class, 'confirm'])->name('checkout.confirm');
+
+    // Order Routes
+    Route::get('/orders/{id}/confirmation', function($id) {
+        $order = \App\Models\Order::with('items.product')->findOrFail($id);
+        if (Auth::id() !== $order->user_id) {
+            abort(403);
+        }
+        return view('orders.confirmation', compact('order'));
+    })->name('orders.confirmation');
+
     // Booking Routes
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -122,6 +142,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/events/{id}', [EventManagementController::class, 'show'])->name('events.show');
     Route::put('/events/{id}', [EventManagementController::class, 'update'])->name('events.update');
     Route::delete('/events/{id}', [EventManagementController::class, 'destroy'])->name('events.destroy');
+    
+    // Product Management
+    Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
+    
+    // Product Category Management
+    Route::resource('product-categories', \App\Http\Controllers\Admin\ProductCategoryController::class);
+    
+    // Order Management
+    Route::get('/orders', [\App\Http\Controllers\Admin\OrderManagementController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'update'])->name('orders.update');
 });
 
 // Stripe Webhook

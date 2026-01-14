@@ -248,6 +248,55 @@
     </div>
 </div>
 
+<!-- Recent Orders -->
+@if($recentOrders && $recentOrders->count() > 0)
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-white">Recent Orders</h2>
+        <a href="{{ route('merch') }}" class="text-[#FFD900] hover:underline text-sm">Shop More →</a>
+    </div>
+    <div class="bg-[#1F1F1F] border border-[#282828] rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-[#282828]">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Order #</th>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Date</th>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Items</th>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Total</th>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Status</th>
+                        <th class="px-4 py-3 text-left text-gray-400 font-semibold text-sm">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentOrders as $order)
+                    <tr class="border-b border-[#282828] hover:bg-[#282828] transition-colors">
+                        <td class="px-4 py-3 text-white font-semibold">{{ $order->order_number }}</td>
+                        <td class="px-4 py-3 text-gray-400">{{ $order->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3 text-gray-400">{{ $order->items->count() }} item(s)</td>
+                        <td class="px-4 py-3 text-[#FFD900] font-semibold">${{ number_format($order->total_amount, 2) }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs font-bold 
+                                {{ $order->status === 'delivered' ? 'bg-green-500' : 
+                                   ($order->status === 'shipped' ? 'bg-blue-500' : 
+                                   ($order->status === 'processing' ? 'bg-yellow-500' : 
+                                   ($order->status === 'cancelled' ? 'bg-red-500' : 'bg-gray-500'))) }} 
+                                text-white">
+                                {{ ucfirst($order->status) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{{ route('orders.confirmation', $order->id) }}" class="text-[#FFD900] hover:underline text-sm">View</a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 <script>
     // Earnings Chart
     const earningsCtx = document.getElementById('earningsChart').getContext('2d');

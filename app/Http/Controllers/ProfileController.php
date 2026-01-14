@@ -15,7 +15,7 @@ class ProfileController extends Controller
 
     public function show()
     {
-        $user = Auth::user()->load('dj', 'bookings.dj', 'events');
+        $user = Auth::user()->load('dj', 'bookings.dj', 'events', 'orders.items.product');
         return view('profile.show', compact('user'));
     }
 
