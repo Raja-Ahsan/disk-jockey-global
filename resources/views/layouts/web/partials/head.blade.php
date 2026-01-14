@@ -13,5 +13,18 @@
 
         <!-- Styles / Scripts -->
         <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <script>
+            // Initialize AOS
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof AOS !== 'undefined') {
+                    AOS.init({
+                        duration: 800,
+                        once: true
+                    });
+                }
+            });
+        </script>
 </head>

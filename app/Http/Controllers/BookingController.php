@@ -28,6 +28,10 @@ class BookingController extends Controller
 
     public function create(Request $request)
     {
+        $request->validate([
+            'dj_id' => 'required|exists:djs,id',
+        ]);
+
         $dj = DJ::findOrFail($request->dj_id);
         return view('bookings.create', compact('dj'));
     }
@@ -52,8 +56,25 @@ class BookingController extends Controller
         $start = Carbon::parse($request->booking_date . ' ' . $request->start_time);
         $end = Carbon::parse($request->booking_date . ' ' . $request->end_time);
         $hours = $end->diffInHours($start);
-        $totalAmount = $hours * $dj->hourly_rate;
-        $depositAmount = $totalAmount * 0.3; // 30% deposit
+        
+        // Ensure minimum 1 hour
+        if ($hours < 1) {
+            $hours = 1;
+        }
+        
+        // Ensure DJ has a valid hourly rate
+        $hourlyRate = $dj->hourly_rate ?? 0;
+        if ($hourlyRate <= 0) {
+            return redirect()->back()->withErrors(['dj_id' => 'This DJ has not set an hourly rate.'])->withInput();
+        }
+        
+        $totalAmount = round($hours * $hourlyRate, 2);
+        $depositAmount = round($totalAmount * 0.3, 2); // 30% deposit
+        
+        // Ensure minimum amounts
+        if ($totalAmount < 0.01) {
+            return redirect()->back()->withErrors(['error' => 'Invalid booking amount.'])->withInput();
+        }
 
         $booking = Booking::create([
             'user_id' => Auth::id(),

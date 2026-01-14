@@ -46,7 +46,7 @@ Route::post('/home-search', [SearchController::class, 'homeSearch'])->name('home
 
 // DJ Routes
 Route::get('/dj/{id}', [DJController::class, 'show'])->name('dj.show');
-Route::get('/dj/{id}/book', [BookingController::class, 'create'])->name('bookings.create');
+Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

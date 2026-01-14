@@ -25,8 +25,45 @@ class PaymentController extends Controller
         }
 
         try {
-            $amount = $request->type === 'deposit' ? $booking->deposit_amount : $booking->total_amount;
-            $amountInCents = (int)($amount * 100);
+            // Ensure booking has valid total amount
+            if (!$booking->total_amount || $booking->total_amount <= 0) {
+                return response()->json([
+                    'error' => 'This booking has an invalid total amount. Please contact support.'
+                ], 400);
+            }
+
+            // Determine the amount to charge
+            if ($request->type === 'deposit') {
+                // If deposit_amount is null or 0, calculate 30% of total
+                if (!$booking->deposit_amount || $booking->deposit_amount <= 0) {
+                    $amount = round($booking->total_amount * 0.3, 2);
+                    // Update the booking with the calculated deposit
+                    $booking->update(['deposit_amount' => $amount]);
+                } else {
+                    $amount = $booking->deposit_amount;
+                }
+            } else {
+                // For remaining balance (when payment_status is 'partial')
+                $depositPaid = $booking->deposit_amount ?? 0;
+                $amount = round($booking->total_amount - $depositPaid, 2);
+            }
+
+            // Ensure amount is valid and at least $0.01
+            if ($amount === null || $amount <= 0) {
+                return response()->json([
+                    'error' => 'Invalid payment amount. Please contact support.'
+                ], 400);
+            }
+
+            // Convert to cents with proper rounding to avoid floating point issues
+            $amountInCents = (int)round($amount * 100);
+
+            // Stripe requires at least 1 cent
+            if ($amountInCents < 1) {
+                return response()->json([
+                    'error' => 'Payment amount must be at least $0.01.'
+                ], 400);
+            }
 
             $paymentIntent = PaymentIntent::create([
                 'amount' => $amountInCents,
