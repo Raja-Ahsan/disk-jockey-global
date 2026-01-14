@@ -115,16 +115,20 @@ class DJController extends Controller
             'zipcode' => 'required|string|max:10',
             'hourly_rate' => 'required|numeric|min:0',
             'experience_years' => 'required|integer|min:0',
-            'specialties' => 'nullable|array',
-            'genres' => 'nullable|array',
+            'specialties' => 'nullable|string',
+            'genres' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'website' => 'nullable|url|max:255',
             'equipment' => 'nullable|string',
-            'is_available' => 'boolean',
+            'is_available' => 'nullable',
         ]);
 
-        $data = $request->all();
+        $data = $request->only([
+            'stage_name', 'bio', 'city', 'state', 'zipcode', 
+            'hourly_rate', 'experience_years', 'phone', 'website', 'equipment'
+        ]);
 
+        // Handle profile image upload
         if ($request->hasFile('profile_image')) {
             if ($dj->profile_image) {
                 Storage::disk('public')->delete($dj->profile_image);
@@ -132,8 +136,21 @@ class DJController extends Controller
             $data['profile_image'] = $request->file('profile_image')->store('dj-profiles', 'public');
         }
 
-        $data['specialties'] = $request->specialties ?? [];
-        $data['genres'] = $request->genres ?? [];
+        // Convert comma-separated strings to arrays for genres and specialties
+        if ($request->filled('genres')) {
+            $data['genres'] = array_map('trim', explode(',', $request->genres));
+        } else {
+            $data['genres'] = [];
+        }
+
+        if ($request->filled('specialties')) {
+            $data['specialties'] = array_map('trim', explode(',', $request->specialties));
+        } else {
+            $data['specialties'] = [];
+        }
+
+        // Handle boolean field
+        $data['is_available'] = $request->has('is_available') && $request->is_available == '1';
 
         $dj->update($data);
 

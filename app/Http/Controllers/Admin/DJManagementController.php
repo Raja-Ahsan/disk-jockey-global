@@ -68,14 +68,19 @@ class DJManagementController extends Controller
             'zipcode' => 'required|string|max:10',
             'hourly_rate' => 'required|numeric|min:0',
             'experience_years' => 'required|integer|min:0',
-            'specialties' => 'nullable|array',
-            'genres' => 'nullable|array',
-            'is_verified' => 'boolean',
-            'is_available' => 'boolean',
+            'specialties' => 'nullable|string',
+            'genres' => 'nullable|string',
+            'equipment' => 'nullable|string',
+            'is_verified' => 'nullable',
+            'is_available' => 'nullable',
         ]);
 
-        $data = $request->all();
+        $data = $request->only([
+            'stage_name', 'bio', 'city', 'state', 'zipcode', 
+            'hourly_rate', 'experience_years', 'equipment'
+        ]);
 
+        // Handle profile image upload
         if ($request->hasFile('profile_image')) {
             if ($dj->profile_image) {
                 Storage::disk('public')->delete($dj->profile_image);
@@ -83,13 +88,30 @@ class DJManagementController extends Controller
             $data['profile_image'] = $request->file('profile_image')->store('dj-profiles', 'public');
         }
 
-        $data['specialties'] = $request->specialties ?? [];
-        $data['genres'] = $request->genres ?? [];
+        // Convert comma-separated strings to arrays for genres and specialties
+        if ($request->filled('genres')) {
+            $data['genres'] = array_map('trim', explode(',', $request->genres));
+        } else {
+            $data['genres'] = [];
+        }
+
+        if ($request->filled('specialties')) {
+            $data['specialties'] = array_map('trim', explode(',', $request->specialties));
+        } else {
+            $data['specialties'] = [];
+        }
+
+        // Handle boolean fields
+        $data['is_verified'] = $request->has('is_verified') && $request->is_verified == '1';
+        $data['is_available'] = $request->has('is_available') && $request->is_available == '1';
 
         $dj->update($data);
 
+        // Sync categories
         if ($request->has('categories')) {
             $dj->categories()->sync($request->categories);
+        } else {
+            $dj->categories()->sync([]);
         }
 
         return redirect()->route('admin.djs.index')->with('success', 'DJ updated successfully!');

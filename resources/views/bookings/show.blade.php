@@ -312,8 +312,22 @@ document.addEventListener('DOMContentLoaded', function() {
             button.disabled = false;
             button.textContent = 'Pay ${{ number_format($booking->payment_status === 'pending' ? $booking->deposit_amount : ($booking->total_amount - $booking->deposit_amount), 2) }}';
         } else if (paymentIntent.status === 'succeeded') {
-            // Redirect to confirmation page
-            window.location.href = '{{ route('payment.confirm', $booking->id) }}';
+            // Payment succeeded - confirm on server via POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('payment.confirm', $booking->id) }}';
+            form.style.display = 'none';
+            
+            // Add CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            form.appendChild(csrfInput);
+            
+            // Append form to body and submit
+            document.body.appendChild(form);
+            form.submit();
         }
     });
     @else

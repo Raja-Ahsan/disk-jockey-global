@@ -30,9 +30,9 @@ class LoginController extends Controller
             if ($user->isAdmin()) {
                 return redirect()->intended('/admin/dashboard');
             } elseif ($user->isDJ()) {
-                // If DJ has a profile, show it; otherwise, create one
+                // If DJ has a profile, show dashboard; otherwise, create one
                 if ($user->dj) {
-                    return redirect()->intended('/dj/' . $user->dj->id);
+                    return redirect()->intended('/dj/dashboard');
                 } else {
                     return redirect()->intended('/dj/create');
                 }

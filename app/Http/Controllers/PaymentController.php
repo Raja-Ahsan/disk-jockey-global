@@ -97,10 +97,21 @@ class PaymentController extends Controller
         }
 
         try {
+            if (!$booking->stripe_payment_intent_id) {
+                if ($request->expectsJson()) {
+                    return response()->json(['error' => 'No payment intent found'], 400);
+                }
+                return redirect()->back()->with('error', 'No payment intent found.');
+            }
+
             $paymentIntent = PaymentIntent::retrieve($booking->stripe_payment_intent_id);
 
             if ($paymentIntent->status === 'succeeded') {
-                $paymentStatus = $paymentIntent->amount === (int)($booking->deposit_amount * 100) ? 'partial' : 'paid';
+                // Determine if this was a deposit or full payment
+                $depositAmount = $booking->deposit_amount ?? 0;
+                $isDeposit = $paymentIntent->amount === (int)round($depositAmount * 100) && $depositAmount > 0;
+                
+                $paymentStatus = $isDeposit ? 'partial' : 'paid';
 
                 $booking->update([
                     'payment_status' => $paymentStatus,
@@ -113,12 +124,27 @@ class PaymentController extends Controller
                     ]);
                 }
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Payment confirmed successfully!',
+                        'payment_status' => $paymentStatus
+                    ]);
+                }
+
                 return redirect()->route('bookings.show', $booking->id)
                     ->with('success', 'Payment successful!');
             }
 
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Payment not completed'], 400);
+            }
+
             return redirect()->back()->with('error', 'Payment not completed.');
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
             return redirect()->back()->with('error', 'Payment error: ' . $e->getMessage());
         }
     }

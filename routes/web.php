@@ -44,7 +44,10 @@ Route::get('/contact', function () {
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 Route::post('/home-search', [SearchController::class, 'homeSearch'])->name('home.search');
 
-// DJ Routes
+// DJ Dashboard Route (must come BEFORE /dj/{id} to avoid route conflicts)
+Route::middleware('auth')->get('/dj/dashboard', [\App\Http\Controllers\DJ\DJDashboardController::class, 'dashboard'])->name('dj.dashboard');
+
+// DJ Routes (public profile view)
 Route::get('/dj/{id}', [DJController::class, 'show'])->name('dj.show');
 Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
 
@@ -65,6 +68,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // DJ Dashboard Routes (all routes use DJ middleware from controller)
+    Route::prefix('dj/dashboard')->name('dj.dashboard.')->group(function () {
+        Route::get('/profile', [\App\Http\Controllers\DJ\DJDashboardController::class, 'profile'])->name('profile');
+        Route::get('/edit', [\App\Http\Controllers\DJ\DJDashboardController::class, 'edit'])->name('edit');
+        Route::put('/update', [\App\Http\Controllers\DJ\DJDashboardController::class, 'update'])->name('update');
+        Route::get('/bookings', [\App\Http\Controllers\DJ\DJDashboardController::class, 'bookings'])->name('bookings');
+        Route::get('/bookings/{id}', [\App\Http\Controllers\DJ\DJDashboardController::class, 'showBooking'])->name('bookings.show');
+    });
+
     // DJ Profile Management
     Route::get('/dj/create', [DJController::class, 'create'])->name('dj.create');
     Route::post('/dj', [DJController::class, 'store'])->name('dj.store');
@@ -81,9 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{id}/complete', [BookingController::class, 'complete'])->name('bookings.complete');
 
-    // Payment Routes
-    Route::post('/bookings/{id}/payment-intent', [PaymentController::class, 'createPaymentIntent'])->name('payment.intent');
-    Route::post('/bookings/{id}/confirm-payment', [PaymentController::class, 'confirmPayment'])->name('payment.confirm');
+        // Payment Routes
+        Route::post('/bookings/{id}/payment-intent', [PaymentController::class, 'createPaymentIntent'])->name('payment.intent');
+        Route::match(['get', 'post'], '/bookings/{id}/confirm-payment', [PaymentController::class, 'confirmPayment'])->name('payment.confirm');
 });
 
 // Admin Routes

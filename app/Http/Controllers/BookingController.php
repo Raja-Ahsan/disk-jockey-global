@@ -18,10 +18,17 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with('dj.user', 'event', 'user')
-            ->where('user_id', Auth::id())
-            ->orderBy('booking_date', 'desc')
-            ->paginate(10);
+        $query = Booking::with('dj.user', 'event', 'user');
+
+        // If user is a DJ, show bookings for their DJ profile
+        if (Auth::user()->isDJ() && Auth::user()->dj) {
+            $query->where('dj_id', Auth::user()->dj->id);
+        } else {
+            // Regular users see their own bookings
+            $query->where('user_id', Auth::id());
+        }
+
+        $bookings = $query->orderBy('booking_date', 'desc')->paginate(10);
 
         return view('bookings.index', compact('bookings'));
     }

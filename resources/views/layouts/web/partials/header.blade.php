@@ -34,7 +34,7 @@
                                 Admin Dashboard
                             </a>
                         @elseif(Auth::user()->isDJ())
-                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-white hover:bg-[#282828] hover:text-[#FFD900] transition-colors">
+                            <a href="{{ route('dj.dashboard') }}" class="block px-4 py-2 text-white hover:bg-[#282828] hover:text-[#FFD900] transition-colors">
                                 DJ Dashboard
                             </a>
                         @else
@@ -93,7 +93,7 @@
                 @if(Auth::user()->isAdmin())
                     <a href="{{ route('admin.dashboard') }}" class="text-[16px] font-semibold text-[#FFD900]">Admin Dashboard</a>
                 @elseif(Auth::user()->isDJ())
-                    <a href="{{ route('profile.show') }}" class="text-[16px] font-semibold text-[#FFD900]">DJ Dashboard</a>
+                    <a href="{{ route('dj.dashboard') }}" class="text-[16px] font-semibold text-[#FFD900]">DJ Dashboard</a>
                 @else
                     <a href="{{ route('profile.show') }}" class="text-[16px] font-semibold text-[#FFD900]">My Dashboard</a>
                 @endif

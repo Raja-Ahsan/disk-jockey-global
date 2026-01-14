@@ -34,7 +34,7 @@ class EventManagementController extends Controller
 
     public function show($id)
     {
-        $event = Event::with('user', 'bookings.dj.user')->findOrFail($id);
+        $event = Event::with('user', 'bookings.dj.user', 'bookings.dj.categories')->findOrFail($id);
         return view('admin.events.show', compact('event'));
     }
 
