@@ -292,3 +292,18 @@
 .dj-main-img {
     @apply relative z-10 w-full max-w-[500px] md:max-w-none block object-contain;
 }
+
+/* Auth Pages */
+input[type="radio"]:checked + div {
+    @apply border-[#FFD900] bg-[#FFD900]/10;
+}
+
+input[type="checkbox"] {
+    @apply rounded;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    @apply rounded-none;
+}
