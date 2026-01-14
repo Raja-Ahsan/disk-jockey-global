@@ -28,9 +28,9 @@
         <aside class="w-64 bg-[#1F1F1F] border-r border-[#282828] flex flex-col fixed lg:static h-full z-30 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
             <!-- Logo -->
             <div class="p-6 border-b border-[#282828]">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+                <a href="{{ route('admin.dashboard') }}" class="">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-auto">
-                    <span class="text-white font-bold text-xl">Admin Panel</span>
+                    <span class="text-white font-bold text-sm">Admin Panel</span>
                 </a>
             </div>
 
@@ -64,7 +64,7 @@
                             <span class="font-semibold">Manage Bookings</span>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="{{ route('admin.events.index') }}" 
                            class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-white transition-all {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@
                             </svg>
                             <span class="font-semibold">Manage Events</span>
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </nav>
 

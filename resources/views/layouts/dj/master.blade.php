@@ -82,7 +82,7 @@
                             <span class="font-semibold truncate">My Profile</span>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="{{ route('dj.dashboard.edit') }}" 
                            class="sidebar-link flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-white transition-all text-sm sm:text-base {{ request()->routeIs('dj.dashboard.edit') ? 'active' : '' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@
                             </svg>
                             <span class="font-semibold truncate">Edit Profile</span>
                         </a>
-                    </li>
+                    </li> -->
                     @endif
                     <li>
                         <a href="{{ route('dj.dashboard.bookings') }}" 
@@ -122,7 +122,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <a href="{{ route('profile.show') }}" class="flex-1 px-3 py-2 bg-[#282828] text-white text-xs sm:text-sm rounded-lg hover:bg-[#353535] transition-colors text-center">
+                    <a href="{{ route('dj.dashboard.profile') }}" class="flex-1 px-3 py-2 bg-[#282828] text-white text-xs sm:text-sm rounded-lg hover:bg-[#353535] transition-colors text-center">
                         Profile
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="flex-1">
