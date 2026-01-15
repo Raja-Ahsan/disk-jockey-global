@@ -18,6 +18,118 @@
 
     <!-- CTAs -->
     <div class="flex items-center space-x-4 md:space-x-6 xl:space-x-10">
+        @php
+            $cart = session()->get('cart', []);
+            $cartCount = 0;
+            $cartItems = [];
+            $cartTotal = 0;
+            
+            foreach ($cart as $key => $item) {
+                if (isset($item['product_id']) && isset($item['quantity'])) {
+                    $product = \App\Models\Product::with('productCategory')->find($item['product_id']);
+                    if ($product && $product->is_active) {
+                        $variation = null;
+                        $price = $product->current_price;
+                        
+                        if ($product->isVariable() && isset($item['variation_id'])) {
+                            $variation = \App\Models\ProductVariation::with('attributes')->find($item['variation_id']);
+                            if ($variation && $variation->product_id == $product->id) {
+                                $price = $variation->current_price;
+                            }
+                        }
+                        
+                        $cartCount += $item['quantity'];
+                        $subtotal = $price * $item['quantity'];
+                        $cartTotal += $subtotal;
+                        
+                        $cartItems[] = [
+                            'cart_key' => $key,
+                            'product' => $product,
+                            'variation' => $variation,
+                            'quantity' => $item['quantity'],
+                            'price' => $price,
+                            'subtotal' => $subtotal
+                        ];
+                    }
+                }
+            }
+        @endphp
+
+        <!-- Cart Icon with Dropdown -->
+        <div class="relative group" id="cartDropdown">
+            <a href="{{ route('cart.index') }}" class="relative flex items-center text-white hover:text-[#FFD900] transition-colors">
+                <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                @if($cartCount > 0)
+                    <span class="absolute -top-2 -right-2 bg-[#FFD900] text-[#333333] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center min-w-[20px]">
+                        {{ $cartCount > 99 ? '99+' : $cartCount }}
+                    </span>
+                @endif
+            </a>
+            
+            <!-- Cart Dropdown -->
+            @if($cartCount > 0)
+            <div id="cartDropdownMenu" class="hidden lg:group-hover:block absolute right-0 mt-2 w-80 md:w-96 bg-[#1F1F1F] border border-[#282828] rounded-lg shadow-xl z-50 max-h-[600px] overflow-y-auto">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#282828]">
+                        <h3 class="text-white font-bold text-lg">Shopping Cart</h3>
+                        <span class="text-[#FFD900] text-sm">{{ $cartCount }} {{ $cartCount == 1 ? 'item' : 'items' }}</span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4 max-h-[400px] overflow-y-auto">
+                        @foreach(array_slice($cartItems, 0, 5) as $item)
+                        <div class="flex gap-3 p-2 bg-[#161616] rounded-lg">
+                            <img src="{{ $item['variation'] && $item['variation']->image ? $item['variation']->image_url : $item['product']->image_url }}" 
+                                 alt="{{ $item['product']->name }}" 
+                                 class="w-16 h-16 object-cover rounded">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white text-sm font-semibold truncate">{{ $item['product']->name }}</h4>
+                                @if($item['variation'] && $item['variation']->attributes->count() > 0)
+                                    <p class="text-gray-400 text-xs mt-1">
+                                        @foreach($item['variation']->attributes as $attr)
+                                            {{ ucfirst($attr->attribute_name) }}: {{ $attr->attribute_value }}
+                                            @if(!$loop->last), @endif
+                                        @endforeach
+                                    </p>
+                                @endif
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-gray-400 text-xs">Qty: {{ $item['quantity'] }}</span>
+                                    <span class="text-[#FFD900] font-bold text-sm">${{ number_format($item['subtotal'], 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        @if(count($cartItems) > 5)
+                            <p class="text-gray-400 text-xs text-center py-2">
+                                +{{ count($cartItems) - 5 }} more item(s)
+                            </p>
+                        @endif
+                    </div>
+                    
+                    <div class="pt-3 border-t border-[#282828]">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-white font-semibold">Subtotal:</span>
+                            <span class="text-[#FFD900] font-bold text-lg">${{ number_format($cartTotal, 2) }}</span>
+                        </div>
+                        <a href="{{ route('cart.index') }}" class="block w-full bg-[#FFD900] text-[#333333] text-center py-2 rounded-lg font-bold hover:bg-[#FFA500] transition-colors mb-2">
+                            View Cart
+                        </a>
+                        @auth
+                            <a href="{{ route('checkout.index') }}" class="block w-full bg-[#1F1F1F] border border-[#282828] text-white text-center py-2 rounded-lg font-semibold hover:bg-[#282828] transition-colors">
+                                Checkout
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="block w-full bg-[#1F1F1F] border border-[#282828] text-white text-center py-2 rounded-lg font-semibold hover:bg-[#282828] transition-colors">
+                                Login to Checkout
+                            </a>
+                        @endauth
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+
         @auth
             <!-- User Dashboard Dropdown (Desktop) -->
             <div class="hidden lg:block relative group">
@@ -87,6 +199,17 @@
         <a href="{{ url('/gallery') }}" class="mobile-menu-nav">Gallery</a>
         <a href="{{ url('/merch') }}" class="mobile-menu-nav">Merch</a>
         <a href="{{ url('/contact') }}" class="mobile-menu-nav">Contact</a>
+        
+        <!-- Mobile Cart Link -->
+        <a href="{{ route('cart.index') }}" class="mobile-menu-nav flex items-center justify-between">
+            <span>Cart</span>
+            @if($cartCount > 0)
+                <span class="bg-[#FFD900] text-[#333333] text-xs font-bold rounded-full px-2 py-1">
+                    {{ $cartCount > 99 ? '99+' : $cartCount }}
+                </span>
+            @endif
+        </a>
+        
         <div class="flex flex-col space-y-4 pt-4">
             @auth
                 <div class="text-[16px] font-semibold text-[#FFD900] mb-2">{{ Auth::user()->name }}</div>
@@ -138,6 +261,32 @@
                 document.body.style.overflow = "auto";
             });
         });
+
+        // Cart dropdown toggle (for mobile/tablet)
+        const cartDropdown = document.getElementById('cartDropdown');
+        const cartDropdownMenu = document.getElementById('cartDropdownMenu');
+        
+        if (cartDropdown && cartDropdownMenu) {
+            const cartButton = cartDropdown.querySelector('button');
+            
+            // Toggle on click for mobile/tablet
+            cartButton.addEventListener('click', (e) => {
+                if (window.innerWidth < 1024) {
+                    e.preventDefault();
+                    cartDropdownMenu.classList.toggle('hidden');
+                } else {
+                    // On desktop, redirect to cart page on click
+                    window.location.href = '{{ route('cart.index') }}';
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!cartDropdown.contains(e.target) && window.innerWidth < 1024) {
+                    cartDropdownMenu.classList.add('hidden');
+                }
+            });
+        }
     });
 </script>
 
