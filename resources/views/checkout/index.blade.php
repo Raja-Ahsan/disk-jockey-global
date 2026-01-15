@@ -71,8 +71,12 @@
                                 </div>
                                 <div>
                                     <label class="block text-white font-semibold mb-2">Country *</label>
-                                    <input type="text" name="shipping_country" value="{{ old('shipping_country', 'US') }}" required
+                                    <select name="shipping_country" required
                                            class="w-full bg-[#161616] border border-[#282828] text-white p-3 rounded-lg focus:border-[#FFD900] focus:outline-none">
+                                        <option value="US" {{ old('shipping_country', 'US') == 'US' ? 'selected' : '' }}>United States</option>
+                                        <option value="CA" {{ old('shipping_country') == 'CA' ? 'selected' : '' }}>Canada</option>
+                                        <option value="MX" {{ old('shipping_country') == 'MX' ? 'selected' : '' }}>Mexico</option>
+                                    </select>
                                 </div>
                             </div>
                             <div>
@@ -100,8 +104,19 @@
                         <div class="space-y-3 mb-6">
                             @foreach($products as $item)
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-400">{{ $item['product']->name }} × {{ $item['quantity'] }}</span>
-                                <span class="text-white">${{ number_format($item['subtotal'], 2) }}</span>
+                                <div class="flex-1">
+                                    <span class="text-gray-400">{{ $item['product']->name }}</span>
+                                    @if($item['variation'])
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            @foreach($item['variation']->attributes as $attr)
+                                                <span>{{ ucfirst($attr->attribute_name) }}: {{ $attr->attribute_value }}</span>
+                                                @if(!$loop->last), @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    <span class="text-gray-500"> × {{ $item['quantity'] }}</span>
+                                </div>
+                                <span class="text-white ml-2">${{ number_format($item['subtotal'], 2) }}</span>
                             </div>
                             @endforeach
                         </div>
@@ -194,43 +209,146 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError);
+                const text = await response.text();
+                console.error('Response text:', text);
+                alert('Error: Invalid response from server. Please try again.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Complete Order';
+                return;
+            }
+
+            if (!response.ok) {
+                let errorMessage = 'An error occurred. Please try again.';
+                
+                if (response.status === 422 && data.errors) {
+                    // Validation errors
+                    const errorMessages = [];
+                    for (const field in data.errors) {
+                        if (data.errors[field]) {
+                            errorMessages.push(data.errors[field].join(', '));
+                        }
+                    }
+                    errorMessage = 'Validation errors:\n' + errorMessages.join('\n');
+                } else if (data.error) {
+                    errorMessage = data.error;
+                } else if (data.message) {
+                    errorMessage = data.message;
+                } else {
+                    errorMessage = `Server error (${response.status}): ${response.statusText}`;
+                }
+                
+                console.error('Checkout error:', errorMessage, data);
+                alert('Error: ' + errorMessage);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Complete Order';
+                return;
+            }
 
             if (data.error) {
+                console.error('Checkout error:', data.error);
                 alert('Error: ' + data.error);
                 submitButton.disabled = false;
                 submitButton.textContent = 'Complete Order';
                 return;
             }
 
-            const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-                payment_method: {
-                    card: cardElement,
-                }
-            });
-
-            if (error) {
-                document.getElementById('card-errors').textContent = error.message;
+            if (!data.clientSecret || !data.orderId) {
+                console.error('Invalid response data:', data);
+                alert('Error: Invalid response from server. Missing payment information.');
                 submitButton.disabled = false;
                 submitButton.textContent = 'Complete Order';
-            } else if (paymentIntent.status === 'succeeded') {
-                const confirmForm = document.createElement('form');
-                confirmForm.method = 'POST';
-                confirmForm.action = '{{ url('/checkout/confirm') }}/' + data.orderId;
-                confirmForm.style.display = 'none';
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token() }}';
-                confirmForm.appendChild(csrfInput);
-                
-                document.body.appendChild(confirmForm);
-                confirmForm.submit();
+                return;
+            }
+
+            let paymentResult;
+            try {
+                paymentResult = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                    }
+                });
+            } catch (stripeError) {
+                console.error('Stripe confirmation error:', stripeError);
+                document.getElementById('card-errors').textContent = stripeError.message || 'Payment confirmation failed';
+                alert('Error: ' + (stripeError.message || 'Payment confirmation failed'));
+                submitButton.disabled = false;
+                submitButton.textContent = 'Complete Order';
+                return;
+            }
+
+            const { error, paymentIntent } = paymentResult;
+
+            if (error) {
+                console.error('Stripe payment error:', error);
+                document.getElementById('card-errors').textContent = error.message;
+                alert('Payment Error: ' + error.message);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Complete Order';
+                return;
+            }
+
+            if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'requires_capture')) {
+                // Payment succeeded, confirm on server
+                try {
+                    const confirmResponse = await fetch('{{ url('/checkout/confirm') }}/' + data.orderId, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            payment_intent_id: paymentIntent.id,
+                            status: paymentIntent.status
+                        })
+                    });
+
+                    const confirmData = await confirmResponse.json();
+
+                    if (confirmResponse.ok && confirmData.success) {
+                        // Redirect to confirmation page
+                        if (confirmData.redirect) {
+                            window.location.href = confirmData.redirect;
+                        } else {
+                            window.location.href = '{{ url('/orders') }}/' + data.orderId + '/confirmation';
+                        }
+                    } else {
+                        const errorMsg = confirmData.error || 'Unknown error occurred';
+                        console.error('Confirmation error:', errorMsg);
+                        alert('Error confirming payment: ' + errorMsg);
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Complete Order';
+                    }
+                } catch (confirmError) {
+                    console.error('Confirmation error:', confirmError);
+                    alert('Payment succeeded but confirmation failed. Please contact support with order ID: ' + data.orderId + '. Error: ' + confirmError.message);
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Complete Order';
+                }
+            } else {
+                document.getElementById('card-errors').textContent = 'Payment status: ' + (paymentIntent?.status || 'unknown');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Complete Order';
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            console.error('Unexpected error:', error);
+            let errorMessage = 'An unexpected error occurred. Please try again.';
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.toString) {
+                errorMessage = error.toString();
+            }
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            alert('Error: ' + errorMessage);
             submitButton.disabled = false;
             submitButton.textContent = 'Complete Order';
         }

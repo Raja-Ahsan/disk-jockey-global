@@ -23,6 +23,22 @@
             </div>
         @endif
 
+        @php
+            // Debug: Show cart contents if empty
+            $cartDebug = session()->get('cart', []);
+        @endphp
+
+        @if(isset($debugMessages) && count($debugMessages) > 0)
+            <div class="mb-6 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg text-yellow-400 text-sm" data-aos="fade-down">
+                <p class="font-bold mb-2">Debug Information:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($debugMessages as $msg)
+                        <li>{{ $msg }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if(count($products) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Cart Items -->
@@ -30,14 +46,17 @@
                 @foreach($products as $item)
                 <div class="bg-[#1F1F1F] border border-[#282828] rounded-lg p-6" data-aos="fade-up">
                     <div class="flex flex-col md:flex-row gap-6">
-                        <img src="{{ $item['variation'] ? $item['variation']->image_url : $item['product']->image_url }}" alt="{{ $item['product']->name }}" 
-                             class="w-32 h-32 object-cover rounded-lg">
+                        <div class="w-32 h-32 flex-shrink-0">
+                            <img src="{{ $item['variation'] && $item['variation']->image ? $item['variation']->image_url : $item['product']->image_url }}" 
+                                 alt="{{ $item['product']->name }}" 
+                                 class="w-full h-full object-cover rounded-lg">
+                        </div>
                         <div class="flex-1">
                             <h3 class="text-xl font-bold text-white mb-2">{{ $item['product']->name }}</h3>
-                            @if($item['variation'])
+                            @if($item['variation'] && $item['variation']->attributes->count() > 0)
                                 <div class="mb-2">
                                     @foreach($item['variation']->attributes as $attr)
-                                        <span class="inline-block px-2 py-1 bg-[#161616] text-gray-300 text-xs rounded mr-2">
+                                        <span class="inline-block px-2 py-1 bg-[#161616] text-gray-300 text-xs rounded mr-2 mb-1">
                                             {{ ucfirst($attr->attribute_name) }}: {{ $attr->attribute_value }}
                                         </span>
                                     @endforeach
@@ -137,6 +156,16 @@
             </svg>
             <h3 class="text-2xl font-bold text-white mb-2">Your cart is empty</h3>
             <p class="text-gray-400 mb-6">Start adding products to your cart!</p>
+            @if(count($cartDebug) > 0)
+                <div class="mb-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg text-yellow-400 text-sm">
+                    <p class="font-bold mb-2">Debug: Cart session has {{ count($cartDebug) }} item(s) but products couldn't be loaded.</p>
+                    <p class="text-xs mb-2">This might be due to invalid product IDs or missing products.</p>
+                    <details class="text-xs">
+                        <summary class="cursor-pointer">View cart session data</summary>
+                        <pre class="mt-2 p-2 bg-black/50 rounded overflow-auto">{{ json_encode($cartDebug, JSON_PRETTY_PRINT) }}</pre>
+                    </details>
+                </div>
+            @endif
             <a href="{{ route('merch') }}" class="btn primary-button inline-block">
                 Browse Products
             </a>

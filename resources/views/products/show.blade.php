@@ -125,7 +125,7 @@
                 @endphp
                 <form id="variationForm" action="{{ route('cart.add', $product->id) }}" method="POST" class="space-y-6 mb-6">
                     @csrf
-                    <input type="hidden" name="variation_id" id="selectedVariationId" value="">
+                    <input type="hidden" name="variation_id" id="selectedVariationId" value="" required>
 
                     @foreach($attributes as $attrName => $attrValues)
                     <div>
@@ -186,6 +186,29 @@
                         </div>
                     </div>
 
+                        <!-- Success/Error Messages -->
+                    @if(session('success'))
+                        <div class="mb-4 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-400">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <!-- Add to Cart Button -->
                     <button type="submit" id="addToCartBtn" disabled class="w-full bg-[#FFD900] text-[#333333] py-4 text-lg font-bold rounded-lg hover:bg-[#FFA500] transition-colors disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed">
                         Add to Cart
@@ -196,6 +219,30 @@
                 @if($hasStock)
                 <form action="{{ route('cart.add', $product->id) }}" method="POST" class="space-y-4 mb-6">
                     @csrf
+                    
+                    <!-- Success/Error Messages -->
+                    @if(session('success'))
+                        <div class="mb-4 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-400">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div>
                         <label class="block text-white font-semibold mb-3">Quantity:</label>
                         <div class="flex items-center gap-4">
@@ -350,7 +397,10 @@ function updateVariationSelection() {
         }
         
         document.getElementById('variationStock').textContent = selectedVariation.stock;
-        document.getElementById('selectedVariationId').value = selectedVariation.id;
+        const variationIdInput = document.getElementById('selectedVariationId');
+        if (variationIdInput) {
+            variationIdInput.value = selectedVariation.id;
+        }
         
         // Update quantity max
         quantityInput.max = selectedVariation.stock;
@@ -405,6 +455,21 @@ document.getElementById('decreaseQty')?.addEventListener('click', function() {
 // Initialize selected attributes display
 Object.keys(selectedAttributes).forEach(attrName => {
     updateSelectedAttribute(attrName, selectedAttributes[attrName]);
+});
+
+// Form submission validation
+document.getElementById('variationForm')?.addEventListener('submit', function(e) {
+    const variationId = document.getElementById('selectedVariationId').value;
+    if (!variationId || variationId === '') {
+        e.preventDefault();
+        alert('Please select a variation before adding to cart.');
+        return false;
+    }
+    if (!selectedVariation || selectedVariation.stock < 1) {
+        e.preventDefault();
+        alert('Selected variation is out of stock.');
+        return false;
+    }
 });
 </script>
 @endif

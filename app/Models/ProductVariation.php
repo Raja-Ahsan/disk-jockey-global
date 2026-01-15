@@ -52,7 +52,19 @@ class ProductVariation extends Model
 
     public function getVariationNameAttribute()
     {
-        $attrs = $this->attributes->map(function($attr) {
+        // Access the relationship using the method to avoid conflict with model's attributes property
+        // Check if relationship is loaded first
+        if ($this->relationLoaded('attributes')) {
+            $variationAttributes = $this->getRelation('attributes');
+        } else {
+            $variationAttributes = $this->attributes()->get();
+        }
+        
+        if ($variationAttributes->isEmpty()) {
+            return 'Default';
+        }
+        
+        $attrs = $variationAttributes->map(function($attr) {
             return $attr->attribute_value;
         })->implode(' - ');
         
