@@ -358,36 +358,55 @@
 
         <!-- Products Grid -->
         @php
-            $featuredProducts = \App\Models\Product::active()->featured()->inStock()->orderBy('sort_order')->limit(4)->get();
-            if($featuredProducts->count() == 0) {
-                $featuredProducts = \App\Models\Product::active()->inStock()->orderBy('sort_order')->limit(4)->get();
-            }
+            $merchProducts = \App\Models\Product::active()
+                ->with('variations', 'productCategory')
+                ->get()
+                ->filter(function($product) {
+                    return $product->has_stock;
+                })
+                ->sortByDesc('created_at')
+                ->take(4);
         @endphp
         
-        @if($featuredProducts->count() > 0)
+        @if($merchProducts->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            @foreach($featuredProducts as $index => $product)
+            @foreach($merchProducts as $index => $product)
             <div class="product-card group" data-aos="fade-up" data-aos-delay="{{ 300 + ($index * 100) }}">
                 <a href="{{ route('products.show', $product->id) }}">
                     <div class="product-img-wrapper relative">
                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-img">
-                        @if($product->sale_price)
+                        @if($product->sale_price || ($product->isVariable() && $product->variations->where('sale_price', '!=', null)->count() > 0))
                             <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">Sale</span>
                         @endif
-                    </div>
-                    <span class="product-category">{{ $product->category ?? 'General' }}</span>
-                    <h3 class="product-name">{{ $product->name }}</h3>
-                    <div class="flex items-center gap-2">
-                        @if($product->sale_price)
-                            <p class="product-price text-[#FFD900]">${{ number_format($product->sale_price, 2) }}</p>
-                            <p class="text-gray-500 line-through text-sm">${{ number_format($product->price, 2) }}</p>
-                        @else
-                            <p class="product-price">${{ number_format($product->price, 2) }}</p>
+                        @if($product->isVariable())
+                            <span class="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">Variable</span>
                         @endif
                     </div>
-                    @if($product->stock <= 5 && $product->stock > 0)
-                        <p class="text-yellow-400 text-xs mt-1">Only {{ $product->stock }} left!</p>
-                    @elseif($product->stock == 0)
+                    <span class="product-category">{{ $product->productCategory->full_name ?? 'General' }}</span>
+                    <h3 class="product-name">{{ $product->name }}</h3>
+                    <div class="flex items-center gap-2">
+                        @if($product->isVariable())
+                            <p class="product-price text-[#FFD900]">From ${{ number_format($product->min_price, 2) }}</p>
+                        @else
+                            @if($product->sale_price)
+                                <p class="product-price text-[#FFD900]">${{ number_format($product->sale_price, 2) }}</p>
+                                <p class="text-gray-500 line-through text-sm">${{ number_format($product->price, 2) }}</p>
+                            @else
+                                <p class="product-price">${{ number_format($product->price, 2) }}</p>
+                            @endif
+                        @endif
+                    </div>
+                    @php
+                        $hasStock = $product->has_stock;
+                        $totalStock = $product->total_stock;
+                    @endphp
+                    @if($hasStock)
+                        @if($totalStock <= 5)
+                            <p class="text-yellow-400 text-xs mt-1">Only {{ $totalStock }} left!</p>
+                        @else
+                            <p class="text-green-400 text-xs mt-1">In Stock</p>
+                        @endif
+                    @else
                         <p class="text-red-400 text-xs mt-1">Out of Stock</p>
                     @endif
                 </a>

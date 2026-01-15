@@ -249,5 +249,10 @@ class DatabaseSeeder extends Seeder
                 $eventData
             );
         }
+
+        // Seed Products, Categories, and Variations
+        $this->call([
+            ProductSeeder::class,
+        ]);
     }
 }

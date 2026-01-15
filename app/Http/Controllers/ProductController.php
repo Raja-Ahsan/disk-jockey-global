@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::active()->with('orderItems', 'productCategory');
+        $query = Product::active()->with('orderItems', 'productCategory', 'variations');
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
@@ -31,10 +31,11 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::active()->with('productCategory')->findOrFail($id);
+        $product = Product::active()->with('productCategory', 'variations.attributes')->findOrFail($id);
         $relatedProducts = Product::active()
             ->where('id', '!=', $id)
             ->where('category_id', $product->category_id)
+            ->with('variations')
             ->limit(4)
             ->get();
 

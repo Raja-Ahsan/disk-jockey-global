@@ -64,6 +64,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Product</th>
                         <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Category</th>
+                        <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Product Type</th>
                         <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Price</th>
                         <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Stock</th>
                         <th class="px-6 py-4 text-left text-gray-400 font-semibold text-sm">Status</th>
@@ -84,17 +85,38 @@
                         </td>
                         <td class="px-6 py-4 text-gray-400">{{ $product->productCategory->full_name ?? 'Uncategorized' }}</td>
                         <td class="px-6 py-4">
-                            @if($product->sale_price)
-                                <span class="text-[#FFD900] font-bold">${{ number_format($product->sale_price, 2) }}</span>
-                                <span class="text-gray-500 line-through text-sm ml-2">${{ number_format($product->price, 2) }}</span>
+                            @if($product->product_type === 'variable')
+                                <span class="px-2 py-1 rounded text-xs font-bold bg-blue-500 text-white">Variable</span>
+                                @if($product->variations->count() > 0)
+                                    <p class="text-gray-500 text-xs mt-1">{{ $product->variations->count() }} variations</p>
+                                @endif
                             @else
-                                <span class="text-[#FFD900] font-bold">${{ number_format($product->price, 2) }}</span>
+                                <span class="px-2 py-1 rounded text-xs font-bold bg-green-500 text-white">Simple</span>
                             @endif
                         </td>
                         <td class="px-6 py-4">
-                            <span class="text-white {{ $product->stock <= 5 ? 'text-yellow-400' : 'text-green-400' }}">
-                                {{ $product->stock }}
-                            </span>
+                            @if($product->product_type === 'variable')
+                                <span class="text-gray-400 text-sm">From ${{ number_format($product->variations->min('price') ?? $product->price, 2) }}</span>
+                            @else
+                                @if($product->sale_price)
+                                    <span class="text-[#FFD900] font-bold">${{ number_format($product->sale_price, 2) }}</span>
+                                    <span class="text-gray-500 line-through text-sm ml-2">${{ number_format($product->price, 2) }}</span>
+                                @else
+                                    <span class="text-[#FFD900] font-bold">${{ number_format($product->price, 2) }}</span>
+                                @endif
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($product->product_type === 'variable')
+                                <span class="text-white">
+                                    {{ $product->variations->sum('stock') }} total
+                                </span>
+                                <p class="text-gray-500 text-xs mt-1">{{ $product->variations->where('stock', '>', 0)->count() }} in stock</p>
+                            @else
+                                <span class="text-white {{ $product->stock <= 5 ? 'text-yellow-400' : 'text-green-400' }}">
+                                    {{ $product->stock }}
+                                </span>
+                            @endif
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded text-xs font-bold {{ $product->is_active ? 'bg-green-500' : 'bg-gray-500' }} text-white">
@@ -129,7 +151,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400">
                             No products found. <a href="{{ route('admin.products.create') }}" class="text-[#FFD900] hover:underline">Create your first product</a>
                         </td>
                     </tr>

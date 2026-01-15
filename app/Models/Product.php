@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -12,7 +13,8 @@ class Product extends Model
 
     protected $fillable = [
         'name', 'slug', 'description', 'short_description', 'price', 'sale_price',
-        'sku', 'stock', 'category_id', 'category', 'image', 'gallery', 'is_active', 'featured', 'sort_order'
+        'sku', 'stock', 'category_id', 'category', 'image', 'gallery', 'product_type',
+        'is_active', 'featured', 'sort_order'
     ];
 
     protected function casts(): array
@@ -38,6 +40,16 @@ class Product extends Model
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
+    public function variations()
+    {
+        return $this->hasMany(ProductVariation::class)->orderBy('sort_order');
+    }
+
+    public function defaultVariation()
+    {
+        return $this->hasOne(ProductVariation::class)->where('is_default', true);
+    }
+
     // Backward compatibility - get category name
     public function getCategoryNameAttribute()
     {
@@ -45,6 +57,27 @@ class Product extends Model
             return $this->productCategory->full_name;
         }
         return $this->category ?? 'Uncategorized';
+    }
+
+    // Helper methods
+    public function isVariable()
+    {
+        return $this->product_type === 'variable';
+    }
+
+    public function isSimple()
+    {
+        return $this->product_type === 'simple';
+    }
+
+    public function getGalleryUrlsAttribute()
+    {
+        if (!$this->gallery || !is_array($this->gallery)) {
+            return [];
+        }
+        return array_map(function($image) {
+            return asset('storage/' . $image);
+        }, $this->gallery);
     }
 
     public function getCurrentPriceAttribute()
@@ -62,7 +95,32 @@ class Product extends Model
 
     public function isInStock()
     {
+        if ($this->isVariable()) {
+            return $this->variations()->where('stock', '>', 0)->where('is_active', true)->exists();
+        }
         return $this->stock > 0;
+    }
+
+    public function getTotalStockAttribute()
+    {
+        if ($this->isVariable()) {
+            return $this->variations()->where('is_active', true)->sum('stock');
+        }
+        return $this->stock;
+    }
+
+    public function getHasStockAttribute()
+    {
+        return $this->isInStock();
+    }
+
+    public function getMinPriceAttribute()
+    {
+        if ($this->isVariable() && $this->variations()->count() > 0) {
+            $minPrice = $this->variations()->where('is_active', true)->min('price');
+            return $minPrice ?? $this->price;
+        }
+        return $this->current_price;
     }
 
     public function scopeActive($query)

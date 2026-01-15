@@ -62,10 +62,14 @@
                             @if($product->sale_price)
                                 <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">Sale</span>
                             @endif
-                            @if($product->stock <= 5 && $product->stock > 0)
+                            @php
+                                $hasStock = $product->has_stock;
+                                $totalStock = $product->total_stock;
+                            @endphp
+                            @if($hasStock && $totalStock <= 5)
                                 <span class="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">Low Stock</span>
                             @endif
-                            @if($product->stock == 0)
+                            @if(!$hasStock)
                                 <span class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                     <span class="bg-red-500 text-white px-4 py-2 rounded font-bold">Out of Stock</span>
                                 </span>
@@ -75,20 +79,21 @@
                     <span class="product-category">{{ $product->productCategory->full_name ?? 'Uncategorized' }}</span>
                     <h3 class="product-name">{{ $product->name }}</h3>
                     <div class="flex items-center gap-2">
-                        @if($product->sale_price)
-                            <p class="product-price text-[#FFD900]">${{ number_format($product->sale_price, 2) }}</p>
-                            <p class="text-gray-500 line-through text-sm">${{ number_format($product->price, 2) }}</p>
+                        @if($product->isVariable())
+                            <p class="product-price text-[#FFD900]">From ${{ number_format($product->min_price, 2) }}</p>
                         @else
-                            <p class="product-price">${{ number_format($product->price, 2) }}</p>
+                            @if($product->sale_price)
+                                <p class="product-price text-[#FFD900]">${{ number_format($product->sale_price, 2) }}</p>
+                                <p class="text-gray-500 line-through text-sm">${{ number_format($product->price, 2) }}</p>
+                            @else
+                                <p class="product-price">${{ number_format($product->price, 2) }}</p>
+                            @endif
                         @endif
                     </div>
-                    @if($product->stock > 0)
-                        <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-4" onclick="event.stopPropagation()">
-                            @csrf
-                            <button type="submit" class="w-full py-3 bg-[#1F1F1F] text-white border border-[#282828] hover:bg-[#FFD900] hover:text-black hover:border-[#FFD900] transition-all font-bold uppercase text-xs tracking-widest">
-                                Add to Cart
-                            </button>
-                        </form>
+                    @if($product->has_stock)
+                        <a href="{{ route('products.show', $product->id) }}" class="mt-4 block w-full py-3 bg-[#1F1F1F] text-white border border-[#282828] hover:bg-[#FFD900] hover:text-black hover:border-[#FFD900] transition-all font-bold uppercase text-xs tracking-widest text-center">
+                            {{ $product->isVariable() ? 'View Options' : 'Add to Cart' }}
+                        </a>
                     @else
                         <button disabled class="mt-4 w-full py-3 bg-gray-500 text-gray-300 border border-gray-600 cursor-not-allowed font-bold uppercase text-xs tracking-widest">
                             Out of Stock

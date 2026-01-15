@@ -30,21 +30,32 @@
                 @foreach($products as $item)
                 <div class="bg-[#1F1F1F] border border-[#282828] rounded-lg p-6" data-aos="fade-up">
                     <div class="flex flex-col md:flex-row gap-6">
-                        <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" 
+                        <img src="{{ $item['variation'] ? $item['variation']->image_url : $item['product']->image_url }}" alt="{{ $item['product']->name }}" 
                              class="w-32 h-32 object-cover rounded-lg">
                         <div class="flex-1">
                             <h3 class="text-xl font-bold text-white mb-2">{{ $item['product']->name }}</h3>
-                            <p class="text-gray-400 mb-4">{{ $item['product']->category ?? 'General' }}</p>
+                            @if($item['variation'])
+                                <div class="mb-2">
+                                    @foreach($item['variation']->attributes as $attr)
+                                        <span class="inline-block px-2 py-1 bg-[#161616] text-gray-300 text-xs rounded mr-2">
+                                            {{ ucfirst($attr->attribute_name) }}: {{ $attr->attribute_value }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <p class="text-gray-400 mb-4">{{ $item['product']->productCategory->full_name ?? 'General' }}</p>
                             <div class="flex items-center gap-4 mb-4">
-                                <form action="{{ route('cart.update', $item['product']->id) }}" method="POST" class="flex items-center gap-2">
+                                <form action="{{ route('cart.update', $item['cart_key']) }}" method="POST" class="flex items-center gap-2">
                                     @csrf
                                     @method('PUT')
                                     <label class="text-white font-semibold">Qty:</label>
-                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="{{ $item['product']->stock }}" 
+                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" 
+                                           min="1" 
+                                           max="{{ $item['variation'] ? $item['variation']->stock : $item['product']->stock }}" 
                                            class="w-20 bg-[#161616] border border-[#282828] text-white p-2 rounded-lg focus:border-[#FFD900] focus:outline-none text-center"
                                            onchange="this.form.submit()">
                                 </form>
-                                <form action="{{ route('cart.remove', $item['product']->id) }}" method="POST" class="inline">
+                                <form action="{{ route('cart.remove', $item['cart_key']) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-400 hover:text-red-300 text-sm" onclick="return confirm('Remove this item from cart?')">
@@ -54,7 +65,7 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 <p class="text-[#FFD900] text-xl font-bold">${{ number_format($item['subtotal'], 2) }}</p>
-                                <p class="text-gray-400 text-sm">${{ number_format($item['product']->current_price, 2) }} each</p>
+                                <p class="text-gray-400 text-sm">${{ number_format($item['price'], 2) }} each</p>
                             </div>
                         </div>
                     </div>
