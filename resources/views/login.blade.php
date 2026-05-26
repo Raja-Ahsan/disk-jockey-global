@@ -38,6 +38,9 @@
                 <div class="mb-10 text-center lg:text-left">
                     <h2 class="text-3xl font-bold text-white mb-2">Login</h2>
                     <p class="text-white font-normal">Welcome back! Please enter your details.</p>
+                    @if (session('url.intended') && (str_contains(session('url.intended'), 'booking-requests') || str_contains(session('url.intended'), 'bookings/create')))
+                        <p class="text-[#FFD900] text-sm mt-3 font-medium">Log in to complete your DJ booking.</p>
+                    @endif
                 </div>
 
                 @if ($errors->any())

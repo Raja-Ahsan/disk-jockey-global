@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\DJ;
 
 use App\Http\Controllers\Controller;
+use App\Models\BookingRequest;
 use App\Models\Booking;
 use App\Models\DJ;
 use App\Models\Category;
@@ -190,7 +191,16 @@ class DJDashboardController extends Controller
 
         $bookings = $query->orderBy('booking_date', 'desc')->paginate(15);
 
-        return view('dj.dashboard.bookings', compact('bookings'));
+        // Booking requests (pre-confirmation) for this DJ.
+        // These are what should show up when there are "no bookings" yet.
+        $bookingRequests = BookingRequest::with('user')
+            ->where('dj_id', $dj->id)
+            ->where('dj_response', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->limit(15)
+            ->get();
+
+        return view('dj.dashboard.bookings', compact('bookings', 'bookingRequests'));
     }
 
     public function showBooking($id)

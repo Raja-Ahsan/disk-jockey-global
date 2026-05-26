@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminBookingCancelledMail;
 use App\Models\Booking;
 use App\Models\DJ;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class BookingController extends Controller
@@ -40,7 +43,9 @@ class BookingController extends Controller
         ]);
 
         $dj = DJ::findOrFail($request->dj_id);
-        return view('bookings.create', compact('dj'));
+        $bookingSearch = session('booking_search');
+
+        return view('bookings.create', compact('dj', 'bookingSearch'));
     }
 
     public function store(Request $request)
@@ -170,7 +175,13 @@ class BookingController extends Controller
             'cancellation_reason' => $request->cancellation_reason,
         ]);
 
-        return redirect()->back()->with('success', 'Booking cancelled.');
+        $admin = User::where('role', 'admin')->first();
+        if ($admin) {
+            $cancelledBy = Auth::user()->name . ' (' . Auth::user()->role . ')';
+            Mail::to($admin->email)->send(new AdminBookingCancelledMail($booking->load('dj', 'user'), $cancelledBy));
+        }
+
+        return redirect()->back()->with('success', 'Booking cancelled. Admin has been notified.');
     }
 
     public function complete($id)

@@ -37,7 +37,7 @@ class LoginController extends Controller
                     return redirect()->intended('/dj/create');
                 }
             } else {
-                return redirect()->intended('/');
+                return redirect()->intended(route('browse'));
             }
         }
 

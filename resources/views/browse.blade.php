@@ -20,6 +20,54 @@
     <!-- Talent Grid -->
     <section class="py-20">
         <div class="container mx-auto px-6 lg:px-16">
+
+            @if (session('success'))
+                <div class="mb-8 p-4 bg-[#FFD900]/10 border border-[#FFD900]/40 rounded-xl" data-aos="fade-up">
+                    <p class="text-[#FFD900] font-semibold">{{ session('success') }}</p>
+                </div>
+            @endif
+
+            @if (!empty($bookingSearch))
+                <div class="mb-10 p-6 bg-[#1F1F1F] border border-[#282828] rounded-xl" data-aos="fade-up">
+                    <h3 class="text-white font-bold text-xl mb-3">Your Event Details</h3>
+                    @if(!empty($bookingSearch['search_by_name_only']))
+                        <p class="text-[#FFD900] text-sm mb-4">You used name search — complete the full form on the home page before booking.</p>
+                    @endif
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        @if(!empty($bookingSearch['client_name']))
+                        <div><span class="text-[#777777]">Client:</span> <span class="text-white">{{ $bookingSearch['client_name'] }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['event_date']))
+                        <div><span class="text-[#777777]">Event Date:</span> <span class="text-white">{{ \Carbon\Carbon::parse($bookingSearch['event_date'])->format('M d, Y') }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['event_type']))
+                        <div><span class="text-[#777777]">Event:</span> <span class="text-white">{{ $bookingSearch['event_type'] }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['dj_name']))
+                        <div><span class="text-[#777777]">DJ / MC:</span> <span class="text-white">{{ $bookingSearch['dj_name'] }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['venue_name']))
+                        <div><span class="text-[#777777]">Venue:</span> <span class="text-white">{{ $bookingSearch['venue_name'] }}@if(!empty($bookingSearch['venue_type_label'])) ({{ $bookingSearch['venue_type_label'] }})@endif</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['city']) || !empty($bookingSearch['zipcode']))
+                        <div><span class="text-[#777777]">Location:</span> <span class="text-white">{{ $bookingSearch['city'] ?? '' }}@if(!empty($bookingSearch['city']) && !empty($bookingSearch['zipcode'])), @endif{{ $bookingSearch['zipcode'] ?? '' }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['venue_address']))
+                        <div class="md:col-span-2"><span class="text-[#777777]">Address:</span> <span class="text-white">{{ $bookingSearch['venue_address'] }}</span></div>
+                        @endif
+                        @if(!empty($bookingSearch['budget_min']) || !empty($bookingSearch['budget_max']))
+                        <div><span class="text-[#777777]">Budget:</span> <span class="text-white">${{ number_format($bookingSearch['budget_min'] ?? 0) }} – ${{ number_format($bookingSearch['budget_max'] ?? 0) }}</span></div>
+                        @endif
+                    </div>
+                    <p class="text-[#FFD900] text-sm mt-4 font-medium">
+                        @auth
+                            Select a DJ below and click Book Now to confirm your booking.
+                        @else
+                            Select a DJ below. Click Login / Sign Up to Book when you are ready.
+                        @endauth
+                    </p>
+                </div>
+            @endif
             
             <!-- Results Count -->
             @if(isset($djs) && $djs->total() > 0)
@@ -97,13 +145,12 @@
                     <div class="grid grid-cols-2 gap-2">
                         <a href="{{ route('dj.show', $dj->id) }}" class="btn primary-button text-center">View Profile</a>
                         @auth
-                            <a href="{{ route('bookings.create', ['dj_id' => $dj->id]) }}" class="btn secondary-button text-center flex items-center justify-center">
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn secondary-button text-center flex items-center justify-center">
                                 Book Now
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn secondary-button text-center flex items-center justify-center">
-                                <img src="{{ asset('images/login-icon.png') }}" class="w-3 h-3 mr-2" alt="Login">
-                                Login to Book
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn secondary-button text-center flex items-center justify-center">
+                                Login / Sign Up to Book
                             </a>
                         @endauth
                     </div>

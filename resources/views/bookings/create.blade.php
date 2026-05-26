@@ -72,7 +72,7 @@
 
                         <div>
                             <label class="block text-white font-semibold mb-3">Venue Address *</label>
-                            <input type="text" name="venue_address" value="{{ old('venue_address') }}" placeholder="123 Main Street" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
+                            <input type="text" name="venue_address" value="{{ old('venue_address', data_get($bookingSearch, 'venue_address', '')) }}" placeholder="123 Main Street" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
                             @error('venue_address')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -81,7 +81,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-white font-semibold mb-3">City *</label>
-                                <input type="text" name="city" value="{{ old('city') }}" placeholder="New York" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
+                                <input type="text" name="city" value="{{ old('city', data_get($bookingSearch, 'city', '')) }}" placeholder="New York" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
                                 @error('city')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -97,7 +97,7 @@
 
                             <div>
                                 <label class="block text-white font-semibold mb-3">Zipcode *</label>
-                                <input type="text" name="zipcode" value="{{ old('zipcode') }}" placeholder="10001" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
+                                <input type="text" name="zipcode" value="{{ old('zipcode', data_get($bookingSearch, 'zipcode', '')) }}" placeholder="10001" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
                                 @error('zipcode')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -106,7 +106,7 @@
 
                         <div>
                             <label class="block text-white font-semibold mb-3">Special Requests</label>
-                            <textarea name="special_requests" rows="4" placeholder="Any special requirements or requests for the event..." class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">{{ old('special_requests') }}</textarea>
+                            <textarea name="special_requests" rows="4" placeholder="Any special requirements or requests for the event..." class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">{{ old('special_requests', !empty($bookingSearch) ? 'Event: ' . ($bookingSearch['event_type'] ?? '') . ' | Venue: ' . ($bookingSearch['venue_name'] ?? '') . ' (' . ($bookingSearch['venue_type_label'] ?? '') . ')' : '') }}</textarea>
                             @error('special_requests')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror

@@ -14,15 +14,7 @@ use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\EventManagementController;
 
 // Public Routes
-Route::get('/', function () {
-    $djs = \App\Models\DJ::with('user')
-        ->available()
-        ->verified()
-        ->orderBy('rating', 'desc')
-        ->limit(3)
-        ->get();
-    return view('home', compact('djs'));
-})->name('home');
+Route::get('/', [SearchController::class, 'index'])->name('home');
 Route::get('/about-us', function () {
     return view('about-us');
 })->name('about-us');
@@ -40,6 +32,7 @@ Route::get('/merch', [\App\Http\Controllers\ProductController::class, 'index'])-
 Route::get('/products/{id}', [\App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
 
 // Search Routes
+Route::post('/book-search', [SearchController::class, 'bookSearch'])->name('book.search');
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 Route::post('/home-search', [SearchController::class, 'homeSearch'])->name('home.search');
 
@@ -49,6 +42,8 @@ Route::middleware('auth')->get('/dj/dashboard', [\App\Http\Controllers\DJ\DJDash
 // DJ Routes (public profile view)
 Route::get('/dj/{id}', [DJController::class, 'show'])->name('dj.show');
 Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+
+Route::get('/booking-request/respond/{token}', [\App\Http\Controllers\BookingRequestController::class, 'respond'])->name('booking-requests.respond');
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -103,6 +98,12 @@ Route::middleware('auth')->group(function () {
         }
         return view('orders.confirmation', compact('order'));
     })->name('orders.confirmation');
+
+    // Booking Request Routes
+    Route::get('/booking-requests/create', [\App\Http\Controllers\BookingRequestController::class, 'create'])->name('booking-requests.create');
+    Route::post('/booking-requests', [\App\Http\Controllers\BookingRequestController::class, 'store'])->name('booking-requests.store');
+    Route::get('/booking-requests/{id}', [\App\Http\Controllers\BookingRequestController::class, 'show'])->name('booking-requests.show');
+    Route::post('/booking-requests/{id}/cancel', [\App\Http\Controllers\BookingRequestController::class, 'cancel'])->name('booking-requests.cancel');
 
     // Booking Routes
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');

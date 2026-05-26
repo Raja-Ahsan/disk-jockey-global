@@ -1,3 +1,5 @@
+
+<script src="{{asset('assets/js/scroll-smooth.js')}}"></script>
 <footer class="bg-[#191919] text-white pt-20">
     <!-- Main Content Container with Padding -->
     <div class="px-6 lg:px-16 pb-20">

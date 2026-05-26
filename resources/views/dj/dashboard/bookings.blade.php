@@ -27,6 +27,87 @@
         </form>
     </div>
 
+    <!-- Booking Requests Section -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="text-2xl font-bold text-white">Booking Requests</h2>
+            <span class="px-3 py-1 rounded bg-[#FFD900]/15 border border-[#FFD900]/40 text-[#FFD900] text-sm font-semibold">
+                {{ $bookingRequests->count() }} pending
+            </span>
+        </div>
+
+        @if($bookingRequests->count() > 0)
+            <div class="space-y-4">
+                @foreach($bookingRequests as $request)
+                    <div class="bg-[#1F1F1F] border border-[#282828] rounded-lg p-4 sm:p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                    <span class="px-3 py-1 rounded text-xs sm:text-sm font-bold bg-yellow-500 text-white">
+                                        PENDING
+                                    </span>
+                                    @if(!empty($request->expires_at) && $request->isExpired())
+                                        <span class="px-3 py-1 rounded text-xs sm:text-sm font-bold bg-red-500 text-white">
+                                            EXPIRED
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-gray-400 text-xs sm:text-sm mb-1">Client</p>
+                                        <p class="text-white font-semibold">{{ $request->client_name }}</p>
+                                        @if($request->user)
+                                            <p class="text-gray-500 text-xs">{{ $request->user->email }}</p>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400 text-xs sm:text-sm mb-1">Event Date</p>
+                                        <p class="text-white font-semibold">{{ $request->event_date->format('F d, Y') }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400 text-xs sm:text-sm mb-1">Venue</p>
+                                        <p class="text-white">{{ $request->venue_address }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400 text-xs sm:text-sm mb-1">Location</p>
+                                        <p class="text-white">{{ $request->city }}, {{ $request->state }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex items-center justify-between">
+                                    <p class="text-gray-400 text-sm font-semibold">Estimated Total</p>
+                                    <p class="text-[#FFD900] text-xl font-bold">${{ number_format($request->total_amount, 2) }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:gap-3 w-full lg:w-48">
+                                <a
+                                    href="{{ route('booking-requests.respond', ['token' => $request->response_token, 'answer' => 'yes']) }}"
+                                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold transition-colors text-center text-sm sm:text-base whitespace-nowrap"
+                                >
+                                    YES (Accept)
+                                </a>
+
+                                <a
+                                    href="{{ route('booking-requests.respond', ['token' => $request->response_token, 'answer' => 'no']) }}"
+                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold transition-colors text-center text-sm sm:text-base whitespace-nowrap"
+                                >
+                                    NO (Decline)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="bg-[#1F1F1F] border border-[#282828] rounded-lg p-8 sm:p-12 text-center">
+                <h3 class="text-xl font-bold text-white mb-2">No pending booking requests</h3>
+                <p class="text-gray-400">Once a customer sends a request, it will show up here.</p>
+            </div>
+        @endif
+    </div>
+
     @if($bookings->count() > 0)
         <div class="space-y-4">
             @foreach($bookings as $booking)

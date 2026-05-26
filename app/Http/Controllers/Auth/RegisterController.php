@@ -21,6 +21,7 @@ class RegisterController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required_if:role,user|nullable|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:user,dj',
         ]);
@@ -28,6 +29,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
@@ -39,6 +41,6 @@ class RegisterController extends Controller
             return redirect()->route('dj.create');
         }
 
-        return redirect('/');
+        return redirect()->intended(route('browse'));
     }
 }

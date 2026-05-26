@@ -12,7 +12,7 @@
         <a href="{{ url('/browse') }}" class="header-desktop-nav">Browse DJ / MC</a>
         <a href="{{ url('/how-it-works') }}" class="header-desktop-nav">How It Works</a>
         <a href="{{ url('/gallery') }}" class="header-desktop-nav text-nowrap">Gallery</a>
-        <a href="{{ url('/merch') }}" class="header-desktop-nav text-nowrap">Merch</a>
+        <a href="{{ url('/merch') }}" class="header-desktop-nav text-nowrap nav-merch-link">Merchandise</a>
         <a href="{{ url('/contact') }}" class="header-desktop-nav">Contact</a>
     </nav>
 
@@ -197,7 +197,7 @@
         <a href="{{ url('/browse') }}" class="mobile-menu-nav">Browse DJ / MC</a>
         <a href="{{ url('/how-it-works') }}" class="mobile-menu-nav">How It Works</a>
         <a href="{{ url('/gallery') }}" class="mobile-menu-nav">Gallery</a>
-        <a href="{{ url('/merch') }}" class="mobile-menu-nav">Merch</a>
+        <a href="{{ url('/merch') }}" class="mobile-menu-nav">Merchandise</a>
         <a href="{{ url('/contact') }}" class="mobile-menu-nav">Contact</a>
         
         <!-- Mobile Cart Link -->

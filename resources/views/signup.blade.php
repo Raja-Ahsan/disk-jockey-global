@@ -49,6 +49,9 @@
                 <div class="mb-10 text-center lg:text-left">
                     <h2 class="text-3xl font-bold text-white mb-2">Create Account</h2>
                     <p class="text-white font-normal">Please enter your details to get started.</p>
+                    @if (session('url.intended') && (str_contains(session('url.intended'), 'booking-requests') || str_contains(session('url.intended'), 'bookings/create')))
+                        <p class="text-[#FFD900] text-sm mt-3 font-medium">Sign up to confirm your DJ booking. Email and phone are required.</p>
+                    @endif
                 </div>
 
                 @if ($errors->any())
@@ -82,6 +85,14 @@
                         <label class="block text-white font-semibold mb-3">Email Address</label>
                         <input type="email" name="email" value="{{ old('email') }}" placeholder="john@example.com" required class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
                         @error('email')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-white font-semibold mb-3">Phone Number <span class="text-[#777777] font-normal text-xs">(required for booking)</span></label>
+                        <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="+1 (555) 000-0000" class="w-full bg-[#161616] border border-[#282828] text-white p-4 focus:border-[#FFD900] outline-none transition-all placeholder:text-[#555]">
+                        @error('phone')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>

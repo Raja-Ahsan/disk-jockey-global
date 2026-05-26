@@ -43,10 +43,13 @@
                         @endif
                     </div>
                     <div class="flex gap-4">
+                        @if(!empty($bookingSearch) && !empty($bookingSearch['event_date']))
+                            <p class="text-[#FFD900] text-sm mb-3">Your event date: {{ \Carbon\Carbon::parse($bookingSearch['event_date'])->format('M d, Y') }}</p>
+                        @endif
                         @auth
-                            <a href="{{ route('bookings.create', ['dj_id' => $dj->id]) }}" class="btn primary-button">Book Now</a>
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn primary-button">Book Now</a>
                         @else
-                            <a href="{{ route('login') }}" class="btn primary-button">Login to Book</a>
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn primary-button">Login / Sign Up to Book</a>
                         @endauth
                         @if($dj->website)
                             <a href="{{ $dj->website }}" target="_blank" class="btn secondary-button">Visit Website</a>
@@ -146,9 +149,9 @@
                         @endif
 
                         @auth
-                            <a href="{{ route('bookings.create', ['dj_id' => $dj->id]) }}" class="btn primary-button w-full text-center block">Book This DJ</a>
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn primary-button w-full text-center block">Book This DJ</a>
                         @else
-                            <a href="{{ route('login') }}" class="btn primary-button w-full text-center block">Login to Book</a>
+                            <a href="{{ route('booking-requests.create', ['dj_id' => $dj->id]) }}" class="btn primary-button w-full text-center block">Login / Sign Up to Book</a>
                         @endauth
                     </div>
                 </div>

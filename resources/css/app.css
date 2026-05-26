@@ -42,30 +42,212 @@
     .primary-button {
         @apply bg-[var(--primary-color)] text-[var(--btn-color)] ;
         &:hover {
-            @apply bg-[var(--btn-hover-color)];
+            @apply bg-[var(--btn-hover-color)] shadow-[0_0_20px_rgba(255,217,0,0.35)];
+            transform: translateY(-2px);
         }
     }   
 
     .secondary-button {
         @apply bg-[#282828] text-[var(--text-white)] ;
         &:hover {
-            @apply bg-[#FFD900];
+            @apply bg-[#FFD900] text-[#333333] shadow-[0_0_15px_rgba(255,217,0,0.3)];
+            transform: translateY(-2px);
         }
     } 
 
 
     .header-desktop-nav {
-        @apply text-[18px] font-normal transition-colors duration-300;
+        @apply text-[18px] font-normal transition-all duration-300 relative py-1;
         &:hover {
             @apply text-[#FFD900];
+            transform: translateY(-1px);
+        }
+        &::after {
+            content: '';
+            @apply absolute bottom-0 left-0 w-0 h-[2px] bg-[#FFD900] transition-all duration-300;
+        }
+        &:hover::after {
+            @apply w-full;
         }
     }
 
     .mobile-menu-nav {
-        @apply text-[16px] font-normal transition-colors duration-300;
+        @apply text-[16px] font-normal transition-all duration-300 py-2 px-3 rounded-lg;
         &:hover {
-            @apply text-[#FFD900];
+            @apply text-[#FFD900] bg-white/5 translate-x-1;
         }
+    }
+
+    .btn-hover-glow {
+        @apply relative overflow-hidden transition-all duration-300;
+        &:hover {
+            @apply scale-[1.02] shadow-[0_0_25px_rgba(255,217,0,0.45)];
+            transform: translateY(-2px) scale(1.02);
+        }
+        &:active {
+            transform: translateY(0) scale(0.98);
+        }
+    }
+
+    /* Home Landing Page */
+    .home-hero-section {
+        @apply bg-[#000000];
+    }
+
+    .home-hero-glow {
+        animation: heroGlowPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes heroGlowPulse {
+        0%, 100% { opacity: 0.4; transform: translate(-50%, 0) scale(1); }
+        50% { opacity: 0.7; transform: translate(-50%, 0) scale(1.1); }
+    }
+
+    .booking-form-card {
+        --booking-border-duration: 20s;
+        @apply relative rounded-2xl p-[2px] overflow-hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .booking-form-card::before {
+        content: '';
+        position: absolute;
+        inset: -120%;
+        background: conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            transparent 280deg,
+            rgba(255, 217, 0, 0.15) 300deg,
+            #FFD900 325deg,
+            #fff9c4 340deg,
+            #FFD900 355deg,
+            rgba(255, 217, 0, 0.15) 360deg
+        );
+        animation: booking-border-spin var(--booking-border-duration) linear infinite;
+    }
+
+    @keyframes booking-border-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .booking-form-card__inner {
+        @apply relative z-10 bg-[#1C1C1C]/95 backdrop-blur-2xl p-6 md:p-10;
+        border-radius: calc(1rem - 2px);
+    }
+
+    .booking-form-card:hover {
+        box-shadow: 0 0 35px rgba(255, 217, 0, 0.12), 0 25px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .booking-label {
+        @apply block text-[#FFD900] text-xs font-semibold uppercase tracking-widest mb-2;
+    }
+
+    .booking-form-input {
+        @apply w-full bg-[#2a2a2a] border border-[#3a3a3a] text-white px-5 py-4
+               focus:outline-none focus:border-[#FFD900] focus:bg-[#333333]
+               hover:border-[#FFD900]/50 transition-all duration-300
+               placeholder:text-[#666666] rounded-lg;
+    }
+
+    .booking-form-input:focus {
+        box-shadow: 0 0 0 3px rgba(255, 217, 0, 0.15);
+    }
+
+    .booking-form-select {
+        @apply w-full bg-[#2a2a2a] border border-[#3a3a3a] text-white px-5 py-4 appearance-none cursor-pointer
+               focus:outline-none focus:border-[#FFD900] focus:bg-[#333333]
+               hover:border-[#FFD900]/50 transition-all duration-300 rounded-lg;
+    }
+
+    .booking-form-select:focus {
+        box-shadow: 0 0 0 3px rgba(255, 217, 0, 0.15);
+    }
+
+    .booking-select-icon {
+        @apply absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40
+               group-hover:text-[#FFD900] transition-colors duration-300;
+    }
+
+    .booking-field-group {
+        @apply relative;
+    }
+
+    .booking-field-error {
+        @apply text-red-500 text-sm mt-1.5 block;
+    }
+
+    .booking-form-input--error,
+    .booking-form-select--error {
+        @apply border-red-500! focus:border-red-500!;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+
+    .booking-signup-divider {
+        @apply flex items-center gap-4 my-6;
+    }
+
+    .booking-signup-divider::before,
+    .booking-signup-divider::after {
+        content: '';
+        @apply flex-1 h-px bg-[#3a3a3a];
+    }
+
+    .booking-signup-divider span {
+        @apply text-[#777777] text-xs uppercase tracking-widest whitespace-nowrap;
+    }
+
+    .btn-near-me {
+        @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold
+               bg-[#282828] text-white border border-[#3a3a3a] rounded-full
+               transition-all duration-300 cursor-pointer;
+    }
+
+    .btn-near-me:hover:not(:disabled) {
+        @apply bg-[#FFD900] text-[#333333] border-[#FFD900];
+        box-shadow: 0 0 20px rgba(255, 217, 0, 0.35);
+        transform: translateY(-2px);
+    }
+
+    .btn-near-me-active {
+        @apply bg-[#FFD900]/20 text-[#FFD900] border-[#FFD900];
+    }
+
+    .btn-near-me:disabled {
+        @apply opacity-60 cursor-not-allowed;
+    }
+
+    .home-scroll-hint:hover svg {
+        @apply text-[#FFD900];
+    }
+
+    .home-product-card {
+        @apply bg-[#1F1F1F] border border-[#282828] p-4 rounded-xl transition-all duration-300;
+    }
+
+    .home-product-card:hover {
+        @apply border-[#FFD900]/40;
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(255, 217, 0, 0.12);
+    }
+
+    .home-product-img-wrap {
+        @apply rounded-lg overflow-hidden bg-[#161616];
+    }
+
+    .home-merch-section {
+        @apply border-t border-[#282828];
+    }
+
+    header a.group:hover .header-logo {
+        filter: drop-shadow(0 0 8px rgba(255, 217, 0, 0.4));
+        transition: filter 0.3s ease;
+    }
+
+    .nav-merch-link:hover {
+        text-shadow: 0 0 12px rgba(255, 217, 0, 0.5);
     }
 
     @media (min-width: 1020px) and (max-width: 1150px) {
