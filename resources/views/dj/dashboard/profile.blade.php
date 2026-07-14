@@ -81,6 +81,50 @@
         </div>
     </div>
 
+    <!-- Google Calendar Integration -->
+    @php $googleCalendar = $dj->googleCalendar; @endphp
+    <div class="bg-[#1F1F1F] border border-[#282828] rounded-xl p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+                <h2 class="text-xl font-bold text-white mb-1">Google Calendar</h2>
+                <p class="text-gray-400 text-sm">Connect your calendar so customers cannot book you when you are busy.</p>
+            </div>
+            @if($googleCalendar && $googleCalendar->isConnected())
+                <span class="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-bold rounded-full self-start">Connected</span>
+            @elseif($googleCalendar && $googleCalendar->calendar_sync_status === 'error')
+                <span class="px-3 py-1 bg-red-500/20 text-red-400 text-sm font-bold rounded-full self-start">Error</span>
+            @else
+                <span class="px-3 py-1 bg-gray-500/20 text-gray-300 text-sm font-bold rounded-full self-start">Not Connected</span>
+            @endif
+        </div>
+
+        @if($googleCalendar && $googleCalendar->isConnected())
+            <div class="space-y-2 mb-4 text-sm text-gray-300">
+                <p><span class="text-gray-500">Account:</span> {{ $googleCalendar->google_account_email }}</p>
+                <p><span class="text-gray-500">Last sync:</span> {{ optional($googleCalendar->last_synced_at)->diffForHumans() ?? 'Never' }}</p>
+                <p><span class="text-gray-500">Status:</span> {{ ucfirst($googleCalendar->calendar_sync_status) }}</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <form action="{{ route('dj.dashboard.google-calendar.resync') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn secondary-button">Manual Resync</button>
+                </form>
+                <form action="{{ route('dj.dashboard.google-calendar.disconnect') }}" method="POST" onsubmit="return confirm('Disconnect Google Calendar?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors font-semibold">Disconnect</button>
+                </form>
+            </div>
+        @else
+            @if($googleCalendar && $googleCalendar->last_sync_error)
+                <p class="text-red-400 text-sm mb-4">{{ $googleCalendar->last_sync_error }}</p>
+            @endif
+            <a href="{{ route('dj.dashboard.google-calendar.connect') }}" class="btn primary-button inline-block">
+                Connect Google Calendar
+            </a>
+        @endif
+    </div>
+
     <!-- Details Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Genres -->

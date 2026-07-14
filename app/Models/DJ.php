@@ -68,6 +68,16 @@ class DJ extends Model
         return $this->hasMany(Review::class, 'dj_id');
     }
 
+    public function googleCalendar()
+    {
+        return $this->hasOne(DjGoogleCalendar::class, 'dj_id');
+    }
+
+    public function hasGoogleCalendarConnected(): bool
+    {
+        return $this->googleCalendar && $this->googleCalendar->isConnected();
+    }
+
     // Accessors
     public function getProfileImageUrlAttribute(): string
     {

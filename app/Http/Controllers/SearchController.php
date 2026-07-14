@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Services\DjSearchService;
+use App\Support\BookDjValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -32,24 +33,7 @@ class SearchController extends Controller
             return $this->bookSearchByName($request);
         }
 
-        $rules = [
-            'client_name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'zipcode' => 'required|string|max:20',
-            'event_date' => 'required|date|after_or_equal:today',
-            'event_type' => 'required|string|max:255',
-            'venue_type' => 'required|in:club,hall,house,other',
-            'venue_type_other' => 'required_if:venue_type,other|nullable|string|max:255',
-            'venue_name' => 'required|string|max:255',
-            'venue_address' => 'required|string|max:500',
-            'budget_range' => 'required|string',
-            'use_near_me' => 'nullable|in:0,1',
-            'search_by_name' => 'nullable|in:0,1',
-            'dj_name' => 'nullable|string|max:255',
-            'rush_guarantee' => 'nullable|boolean',
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), BookDjValidation::rules());
 
         if ($validator->fails()) {
             if ($request->expectsJson()) {
@@ -61,7 +45,7 @@ class SearchController extends Controller
 
         $validated = $validator->validated();
 
-        [$budgetMin, $budgetMax] = $this->parseBudgetRange($validated['budget_range']);
+        [$budgetMin, $budgetMax] = BookDjValidation::parseBudgetRange($validated['budget_range']);
 
         $venueTypeLabel = $validated['venue_type'] === 'other'
             ? ($validated['venue_type_other'] ?? 'Other')
@@ -195,17 +179,6 @@ class SearchController extends Controller
         }
 
         return redirect($redirect)->with('success', $success);
-    }
-
-    protected function parseBudgetRange(string $range): array
-    {
-        if (str_contains($range, '-')) {
-            [$min, $max] = explode('-', $range, 2);
-
-            return [(float) $min, (float) $max];
-        }
-
-        return [100, 25000];
     }
 
     public function homeSearch(Request $request)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DJ;
 use App\Models\Category;
+use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -44,7 +45,7 @@ class DJManagementController extends Controller
 
     public function show($id)
     {
-        $dj = DJ::with('user', 'categories', 'bookings', 'reviews.user')->findOrFail($id);
+        $dj = DJ::with('user', 'categories', 'bookings', 'reviews.user', 'googleCalendar')->findOrFail($id);
         return view('admin.djs.show', compact('dj'));
     }
 
@@ -144,5 +145,13 @@ class DJManagementController extends Controller
         $dj->delete();
 
         return redirect()->route('admin.djs.index')->with('success', 'DJ deleted successfully.');
+    }
+
+    public function disconnectCalendar($id, GoogleCalendarService $googleCalendar)
+    {
+        $dj = DJ::with('googleCalendar')->findOrFail($id);
+        $googleCalendar->disconnect($dj);
+
+        return redirect()->back()->with('success', 'Google Calendar disconnected for this DJ.');
     }
 }

@@ -253,6 +253,7 @@ class DatabaseSeeder extends Seeder
         // Seed Products, Categories, and Variations
         $this->call([
             ProductSeeder::class,
+            MarketplaceSeeder::class,
         ]);
     }
 }

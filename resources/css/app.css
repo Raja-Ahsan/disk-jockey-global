@@ -57,7 +57,7 @@
 
 
     .header-desktop-nav {
-        @apply text-[18px] font-normal transition-all duration-300 relative py-1;
+        @apply text-[12px] 2xl:text-[14px] font-normal whitespace-nowrap transition-all duration-300 relative py-1 flex-shrink-0;
         &:hover {
             @apply text-[#FFD900];
             transform: translateY(-1px);
@@ -69,12 +69,51 @@
         &:hover::after {
             @apply w-full;
         }
+        &.is-active {
+            @apply text-[#FFD900];
+        }
+        &.is-active::after {
+            @apply w-full;
+        }
+    }
+
+    .site-header {
+        @apply py-3 sm:py-4;
+    }
+
+    .site-header__inner {
+        @apply max-w-[1600px] mx-auto px-4 sm:px-6 xl:px-8 2xl:px-12 flex items-center justify-between gap-3 xl:gap-4;
+    }
+
+    .site-header__nav {
+        @apply gap-2.5 2xl:gap-4 flex-nowrap;
+    }
+
+    .site-mobile-menu {
+        @apply fixed inset-0 z-40 bg-black/95 backdrop-blur-sm;
+        padding-top: 4.5rem;
+    }
+
+    .site-mobile-menu__panel {
+        @apply h-full overflow-y-auto overscroll-contain px-5 sm:px-8 pb-10;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .site-mobile-menu__nav {
+        @apply flex flex-col gap-1 max-w-lg mx-auto;
+    }
+
+    .site-mobile-menu__auth {
+        @apply flex flex-col gap-1 pt-4 mt-2 border-t border-white/10;
     }
 
     .mobile-menu-nav {
-        @apply text-[16px] font-normal transition-all duration-300 py-2 px-3 rounded-lg;
+        @apply text-[16px] sm:text-[17px] font-normal transition-all duration-300 py-3 px-3 rounded-lg;
         &:hover {
             @apply text-[#FFD900] bg-white/5 translate-x-1;
+        }
+        &.is-active {
+            @apply text-[#FFD900] bg-white/5;
         }
     }
 
@@ -248,15 +287,6 @@
 
     .nav-merch-link:hover {
         text-shadow: 0 0 12px rgba(255, 217, 0, 0.5);
-    }
-
-    @media (min-width: 1020px) and (max-width: 1150px) {
-        .mobile-menu-nav, .header-desktop-nav {
-            @apply text-[14px]!;
-        }
-        .header-logo {
-            @apply h-8!;
-        }
     }
 
     .footer-h4 {

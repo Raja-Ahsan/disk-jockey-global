@@ -69,6 +69,36 @@
         </div>
     </div>
 
+    <!-- Google Calendar -->
+    @php $googleCalendar = $dj->googleCalendar; @endphp
+    <div class="bg-[#1F1F1F] border border-[#282828] rounded-xl p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-white mb-2">Google Calendar</h2>
+                @if($googleCalendar && $googleCalendar->isConnected())
+                    <p class="text-green-400 font-semibold mb-1">Connected</p>
+                    <p class="text-gray-400 text-sm">Account: {{ $googleCalendar->google_account_email }}</p>
+                    <p class="text-gray-400 text-sm">Status: {{ ucfirst($googleCalendar->calendar_sync_status) }}</p>
+                    <p class="text-gray-400 text-sm">Last sync: {{ optional($googleCalendar->last_synced_at)->format('M d, Y g:i A') ?? 'Never' }}</p>
+                @elseif($googleCalendar && $googleCalendar->calendar_sync_status === 'error')
+                    <p class="text-red-400 font-semibold mb-1">Error</p>
+                    <p class="text-gray-400 text-sm">{{ $googleCalendar->last_sync_error }}</p>
+                @else
+                    <p class="text-gray-400">Not connected</p>
+                @endif
+            </div>
+            @if($googleCalendar && ($googleCalendar->isConnected() || $googleCalendar->calendar_sync_status === 'error'))
+                <form action="{{ route('admin.djs.disconnect-calendar', $dj->id) }}" method="POST" onsubmit="return confirm('Disconnect this DJ calendar?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors font-semibold">
+                        Disconnect Calendar
+                    </button>
+                </form>
+            @endif
+        </div>
+    </div>
+
     <!-- Details -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Bio & Info -->

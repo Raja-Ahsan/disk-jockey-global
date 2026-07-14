@@ -47,4 +47,14 @@ return [
         'from' => env('TWILIO_FROM'),
     ],
 
+    'plan_my_event' => [
+        'email' => env('PLAN_MY_EVENT_EMAIL'),
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/dj/dashboard/google-calendar/callback'),
+    ],
+
 ];

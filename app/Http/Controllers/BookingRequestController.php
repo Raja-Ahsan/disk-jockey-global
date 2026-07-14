@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\BookingRequest;
 use App\Models\DJ;
 use App\Models\User;
+use App\Services\GoogleCalendarService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,8 @@ use Illuminate\Support\Facades\Mail;
 class BookingRequestController extends Controller
 {
     public function __construct(
-        protected SmsService $sms
+        protected SmsService $sms,
+        protected GoogleCalendarService $googleCalendar
     ) {
         $this->middleware('auth')->except(['respond']);
     }
@@ -85,6 +87,8 @@ class BookingRequestController extends Controller
         }
 
         $dj = DJ::findOrFail($validated['dj_id']);
+        $this->googleCalendar->assertAvailableOrFail($dj, $validated['event_date']);
+
         $rush = ! empty($search['rush_guarantee']);
         $rushFee = $rush ? 50.00 : 0.00;
         $bookingFee = 100.00;

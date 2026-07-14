@@ -31,6 +31,14 @@ Route::get('/contact', function () {
 Route::get('/merch', [\App\Http\Controllers\ProductController::class, 'index'])->name('merch');
 Route::get('/products/{id}', [\App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
 
+// Marketplace (separate from Merchandise)
+Route::get('/marketplace', [\App\Http\Controllers\MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/products/{id}', [\App\Http\Controllers\MarketplaceController::class, 'show'])->name('marketplace.products.show');
+
+// Plan My Event
+Route::get('/plan-my-event', [\App\Http\Controllers\PlanMyEventController::class, 'showForm'])->name('plan-my-event');
+Route::post('/plan-my-event', [\App\Http\Controllers\PlanMyEventController::class, 'store'])->name('plan-my-event.store');
+
 // Search Routes
 Route::post('/book-search', [SearchController::class, 'bookSearch'])->name('book.search');
 Route::post('/search', [SearchController::class, 'search'])->name('search');
@@ -69,7 +77,23 @@ Route::middleware('auth')->group(function () {
         Route::put('/update', [\App\Http\Controllers\DJ\DJDashboardController::class, 'update'])->name('update');
         Route::get('/bookings', [\App\Http\Controllers\DJ\DJDashboardController::class, 'bookings'])->name('bookings');
         Route::get('/bookings/{id}', [\App\Http\Controllers\DJ\DJDashboardController::class, 'showBooking'])->name('bookings.show');
+
+        // Google Calendar
+        Route::get('/google-calendar/connect', [\App\Http\Controllers\DJ\GoogleCalendarController::class, 'connect'])->name('google-calendar.connect');
+        Route::get('/google-calendar/callback', [\App\Http\Controllers\DJ\GoogleCalendarController::class, 'callback'])->name('google-calendar.callback');
+        Route::post('/google-calendar/resync', [\App\Http\Controllers\DJ\GoogleCalendarController::class, 'resync'])->name('google-calendar.resync');
+        Route::delete('/google-calendar/disconnect', [\App\Http\Controllers\DJ\GoogleCalendarController::class, 'disconnect'])->name('google-calendar.disconnect');
     });
+
+    // Marketplace cart & checkout
+    Route::get('/marketplace/cart', [\App\Http\Controllers\MarketplaceCartController::class, 'index'])->name('marketplace.cart.index');
+    Route::post('/marketplace/cart/add/{id}', [\App\Http\Controllers\MarketplaceCartController::class, 'add'])->name('marketplace.cart.add');
+    Route::put('/marketplace/cart/update/{key}', [\App\Http\Controllers\MarketplaceCartController::class, 'update'])->name('marketplace.cart.update');
+    Route::delete('/marketplace/cart/remove/{key}', [\App\Http\Controllers\MarketplaceCartController::class, 'remove'])->name('marketplace.cart.remove');
+    Route::post('/marketplace/cart/clear', [\App\Http\Controllers\MarketplaceCartController::class, 'clear'])->name('marketplace.cart.clear');
+    Route::get('/marketplace/checkout', [\App\Http\Controllers\MarketplaceCheckoutController::class, 'index'])->name('marketplace.checkout.index');
+    Route::post('/marketplace/checkout/process', [\App\Http\Controllers\MarketplaceCheckoutController::class, 'process'])->name('marketplace.checkout.process');
+    Route::post('/marketplace/checkout/confirm/{orderId}', [\App\Http\Controllers\MarketplaceCheckoutController::class, 'confirm'])->name('marketplace.checkout.confirm');
 
     // DJ Profile Management
     Route::get('/dj/create', [DJController::class, 'create'])->name('dj.create');
@@ -130,6 +154,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/djs/{id}', [DJManagementController::class, 'update'])->name('djs.update');
     Route::post('/djs/{id}/verify', [DJManagementController::class, 'verify'])->name('djs.verify');
     Route::post('/djs/{id}/unverify', [DJManagementController::class, 'unverify'])->name('djs.unverify');
+    Route::delete('/djs/{id}/google-calendar', [DJManagementController::class, 'disconnectCalendar'])->name('djs.disconnect-calendar');
     Route::delete('/djs/{id}', [DJManagementController::class, 'destroy'])->name('djs.destroy');
     
     // Booking Management
@@ -154,6 +179,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/orders', [\App\Http\Controllers\Admin\OrderManagementController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'show'])->name('orders.show');
     Route::put('/orders/{id}', [\App\Http\Controllers\Admin\OrderManagementController::class, 'update'])->name('orders.update');
+
+    // Marketplace Management
+    Route::resource('marketplace-products', \App\Http\Controllers\Admin\MarketplaceProductController::class);
+    Route::resource('marketplace-categories', \App\Http\Controllers\Admin\MarketplaceCategoryController::class);
+
+    // Plan My Event Enquiries
+    Route::get('/plan-my-event', [\App\Http\Controllers\Admin\PlanMyEventManagementController::class, 'index'])->name('plan-my-event.index');
+    Route::get('/plan-my-event/{id}', [\App\Http\Controllers\Admin\PlanMyEventManagementController::class, 'show'])->name('plan-my-event.show');
+    Route::put('/plan-my-event/{id}', [\App\Http\Controllers\Admin\PlanMyEventManagementController::class, 'update'])->name('plan-my-event.update');
+    Route::delete('/plan-my-event/{id}', [\App\Http\Controllers\Admin\PlanMyEventManagementController::class, 'destroy'])->name('plan-my-event.destroy');
 });
 
 // Stripe Webhook

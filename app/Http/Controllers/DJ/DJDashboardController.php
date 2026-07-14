@@ -109,7 +109,7 @@ class DJDashboardController extends Controller
     public function profile()
     {
         $dj = Auth::user()->dj;
-        $dj->load('user', 'categories', 'reviews.user');
+        $dj->load('user', 'categories', 'reviews.user', 'googleCalendar');
         
         return view('dj.dashboard.profile', compact('dj'));
     }

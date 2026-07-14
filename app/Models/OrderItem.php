@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'order_id', 'product_id', 'product_name', 'price', 'quantity', 'subtotal'
+        'order_id', 'product_id', 'marketplace_product_id', 'item_source', 'variation_id',
+        'product_name', 'price', 'quantity', 'subtotal'
     ];
 
     protected function casts(): array
@@ -27,5 +28,10 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function marketplaceProduct()
+    {
+        return $this->belongsTo(MarketplaceProduct::class, 'marketplace_product_id');
     }
 }

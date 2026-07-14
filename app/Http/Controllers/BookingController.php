@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\DJ;
 use App\Models\Event;
 use App\Models\User;
+use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -14,8 +15,9 @@ use Carbon\Carbon;
 
 class BookingController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected GoogleCalendarService $googleCalendar
+    ) {
         $this->middleware('auth');
     }
 
@@ -63,6 +65,12 @@ class BookingController extends Controller
         ]);
 
         $dj = DJ::findOrFail($request->dj_id);
+        $this->googleCalendar->assertAvailableOrFail(
+            $dj,
+            $request->booking_date,
+            $request->start_time,
+            $request->end_time
+        );
 
         // Calculate total amount based on hours and hourly rate
         $start = Carbon::parse($request->booking_date . ' ' . $request->start_time);
